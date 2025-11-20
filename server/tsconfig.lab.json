@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",
+    "rootDir": "./",
+    "outDir": "./lab_dist",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "lab routes/**/*.ts",
+    "lab models/**/*.ts",
+    "lab middleware/**/*.ts",
+    "lab utils/**/*.ts"
+  ]
+}

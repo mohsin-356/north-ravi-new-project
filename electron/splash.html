@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://unpkg.com;" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Loading — Hospital Management Suite</title>
+
+    <!-- Poppins font (Google Fonts) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+      :root{
+        --bg-1: rgba(7, 22, 45, 1);
+        --accent-a: #22d3ee; /* cyan */
+        --accent-b: #60a5fa; /* blue */
+        --glass: rgba(255,255,255,0.06);
+      }
+      html,body{height:100%;width:100%;margin:0;background:linear-gradient(180deg,var(--bg-1) 0%, #04112b 100%);font-family: 'Poppins', Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#e6f7ff; overflow:hidden}
+
+      /* center stage */
+      .stage{position:fixed;inset:0;display:grid;place-items:center;perspective:1200px;padding:18px}
+
+      /* glass card */
+      .card{
+        width:min(920px,94vw);height:min(460px,78vh);border-radius:22px;backdrop-filter: blur(10px) saturate(120%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: 0 26px 80px rgba(2,6,23,0.62), inset 0 1px 0 rgba(255,255,255,0.02);
+        display:grid;grid-template-columns:minmax(280px,520px) 1fr;overflow:visible;align-items:center;padding:28px;gap:20px;transform-style:preserve-3d;position:relative;transition:transform .18s ease-out
+      }
+
+      /* left 3d canvas area */
+      .visual{position:relative;border-radius:16px;overflow:visible;height:clamp(260px,38vh,380px)}
+      canvas{display:block;width:100%;height:100%;border-radius:12px}
+
+      /* small decorative SVG overlays inside visual */
+      .visual .overlay-svg{position:absolute;pointer-events:none;opacity:0.95}
+      .overlay-topright{top:12px;right:12px;width:110px;height:110px;transform:translateZ(40px);animation: floaty 9s ease-in-out infinite}
+      .overlay-bottomleft{bottom:6px;left:12px;width:130px;height:130px;transform:translateZ(10px);animation: floaty 12s ease-in-out infinite reverse}
+      @keyframes floaty{0%{transform:translateY(-6px) rotate(-2deg)}50%{transform:translateY(6px) rotate(2deg)}100%{transform:translateY(-6px) rotate(-2deg)}}
+
+      /* right content */
+      .meta{display:flex;flex-direction:column;gap:12px;padding:6px 6px}
+      .brand{display:flex;gap:12px;align-items:center}
+      .logo{width:56px;height:56px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));box-shadow: 0 10px 34px rgba(34,211,238,0.12), 0 2px 8px rgba(96,165,250,0.08);}      
+      .logo svg{width:36px;height:36px;filter:drop-shadow(0 6px 18px rgba(34,211,238,0.14))}
+      h1{margin:0;font-size:clamp(16px,1.6vw,20px);letter-spacing:0.02em;font-weight:700}
+      p.lead{margin:0;color:#d6f4ff;opacity:0.95;font-weight:600;font-size:13px}
+
+      .info{margin-top:8px;color:#c9eefc;line-height:1.35;font-size:13px;opacity:0.95}
+
+      /* illustrations row */
+      .illustrations{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+      .pill{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 20px rgba(2,6,23,0.45);min-width:110px}
+      .pill svg{width:40px;height:40px;flex:0 0 40px}
+      .pill .label{font-size:13px;font-weight:600;color:#e7faff}
+
+      .pill:hover{transform:translateY(-6px);transition:all 220ms cubic-bezier(.2,.9,.2,1)}
+
+      /* progress */
+      .progressWrap{margin-top:auto}
+      .barOuter{width:100%;height:12px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 8px rgba(2,6,23,0.6)}
+      .barInner{height:100%;width:8%;border-radius:999px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));box-shadow:0 12px 36px rgba(34,211,238,0.18);transition:width 320ms cubic-bezier(.2,.9,.2,1)}
+      .percent{margin-top:8px;font-weight:700;font-size:13px;letter-spacing:0.03em;color:#e6fbff}
+
+      /* small footer */
+      .footer{position:absolute;left:18px;bottom:12px;font-size:12px;color:rgba(255,255,255,0.6)}
+
+      /* floating background accents */
+      .accents{position:fixed;inset:-20% -10% -10% -20%;pointer-events:none;filter:blur(44px);opacity:0.85;background: radial-gradient(700px 300px at 12% 22%, rgba(34,211,238,.17), transparent 40%), radial-gradient(600px 260px at 90% 78%, rgba(96,165,250,.12), transparent 40%), radial-gradient(900px 320px at 48% 88%, rgba(14,165,233,.08), transparent 60%);animation: drift 18s ease-in-out infinite alternate}
+      @keyframes drift{from{transform:translateY(-12px) rotate(-2deg) } to{transform:translateY(12px) rotate(2deg)}}
+
+      /* small responsive tweaks */
+      @media (max-width:900px){
+        .card{grid-template-columns:1fr;gap:12px;height:auto;padding:18px}
+        .visual{height:360px}
+        .brand{justify-content:center}
+        .footer{left:12px;right:12px;text-align:center}
+      }
+
+      @media (max-width:600px){
+        .stage{padding:10px}
+        .card{padding:14px;border-radius:14px;gap:10px}
+        .logo{width:48px;height:48px}
+        h1{font-size:16px}
+        p.lead{font-size:12px}
+        .visual{height:260px}
+        .overlay-topright,.overlay-bottomleft{display:none}
+        .pill{min-width:0;padding:8px 10px}
+        .barOuter{height:10px}
+        .barInner{height:100%}
+        .percent{font-size:12px}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="card" id="card">
+        <div class="visual" id="visual">
+          <!-- decorative SVG illustrations layered above the canvas to add personality -->
+          <div class="overlay-svg overlay-topright" aria-hidden>
+            <!-- friendly hospital scene illustration (simple, scalable) -->
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#22d3ee" stop-opacity="0.18"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0.08"/></linearGradient>
+              </defs>
+              <rect x="12" y="48" width="176" height="120" rx="12" fill="url(#g1)" />
+              <rect x="28" y="68" width="40" height="60" rx="4" fill="#e6fbff" opacity="0.08"/>
+              <rect x="76" y="68" width="48" height="60" rx="4" fill="#e6fbff" opacity="0.06"/>
+              <rect x="132" y="68" width="36" height="60" rx="4" fill="#e6fbff" opacity="0.05"/>
+              <g transform="translate(80,28)">
+                <rect x="-10" y="-8" width="40" height="20" rx="6" fill="#e6fbff" opacity="0.14"/>
+                <path d="M10 2v10M0 7h20" stroke="#0ea5e9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </svg>
+          </div>
+
+          <div class="overlay-svg overlay-bottomleft" aria-hidden>
+            <!-- lab + pharmacy tiny montage -->
+            <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#7dd3fc" stop-opacity="0.12"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0.06"/></linearGradient>
+              </defs>
+              <!-- flask -->
+              <path d="M36 36 C46 80, 72 96, 86 136 L86 152 L110 152 L110 136 C124 96,150 80,160 36 Z" fill="url(#g2)" opacity="0.14" />
+              <!-- capsule -->
+              <rect x="140" y="90" width="56" height="22" rx="12" fill="#e6fbff" opacity="0.08" />
+              <path d="M168 96 v12" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="brand">
+            <div class="logo" aria-hidden>
+              <!-- simple inline hospital + cross icon -->
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="3" width="20" height="14" rx="2" fill="white" opacity="0.12"/>
+                <path d="M12 7v6M9 10h6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+                <circle cx="18" cy="6" r="2.2" fill="white" opacity="0.06"/>
+              </svg>
+            </div>
+            <div>
+              <h1>Hospital Management Suite</h1>
+              <p class="lead">Secure • Paperless • Interconnected</p>
+            </div>
+          </div>
+
+          <div class="info">Installing modules: Patient records • OPD • IPD • Pharmacy • Lab • Billing • Reports</div>
+
+          <!-- new: illustrative pills showing Hospital / Pharmacy / Lab -->
+          <div class="illustrations" aria-hidden>
+            <div class="pill" title="Hospital">
+              <!-- hospital svg -->
+              <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="10" width="36" height="28" rx="3" fill="#ffffff" opacity="0.06"/>
+                <rect x="12" y="16" width="6" height="8" rx="1" fill="#e6fbff" opacity="0.06"/>
+                <rect x="21" y="16" width="6" height="8" rx="1" fill="#e6fbff" opacity="0.06"/>
+                <rect x="30" y="16" width="6" height="8" rx="1" fill="#e6fbff" opacity="0.05"/>
+                <rect x="20" y="6" width="8" height="8" rx="1.8" fill="#22d3ee"/>
+                <path d="M24 8v4M22 10h4" stroke="#003447" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="label">Hospital</div>
+            </div>
+
+            <div class="pill" title="Pharmacy">
+              <!-- pharmacy svg (pill + cross) -->
+              <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="10" width="36" height="28" rx="6" fill="#ffffff" opacity="0.03"/>
+                <path d="M14 22c6-6 14-6 20 0" stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <rect x="16" y="26" width="16" height="6" rx="3" fill="#e6fbff" opacity="0.07"/>
+                <g transform="translate(32,14) scale(0.9)">
+                  <path d="M-6 6h8M-2 2v8" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+              </svg>
+              <div class="label">Pharmacy</div>
+            </div>
+
+            <div class="pill" title="Lab">
+              <!-- lab svg (flask) -->
+              <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="10" width="36" height="28" rx="5" fill="#ffffff" opacity="0.03"/>
+                <path d="M20 16v-3h8v3c2 2 3 5 3 8 0 6-6 10-10 10s-10-4-10-10c0-3 1-6 3-8z" fill="#7dd3fc" opacity="0.14"/>
+                <path d="M20 16v-3h8v3" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="label">Lab</div>
+            </div>
+          </div>
+
+          <div class="progressWrap">
+            <div class="barOuter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="barInner" id="barInner"></div>
+            </div>
+            <div class="percent" id="percent">Loading 0% — Mindspire</div>
+          </div>
+        </div>
+        <div class="footer">Powered by Mindspire • Preparing secure environment</div>
+      </div>
+    </div>
+
+    <div class="accents" aria-hidden></div>
+
+    <!-- three.js from CDN (allowed by CSP above) -->
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script>
+      // -----------------------------
+      // 3D Scene: a soft 3D medical cross with ring + particles
+      // -----------------------------
+      const container = document.getElementById('visual');
+      const scene = new THREE.Scene();
+
+      // camera sized to container
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 50);
+      camera.position.set(0.6, 0.8, 2.2);
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      container.appendChild(renderer.domElement);
+
+      // helper to resize renderer and camera to the container's current size
+      function fitRendererToContainer(){
+        const w = Math.max(64, container.clientWidth);
+        const h = Math.max(64, container.clientHeight);
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        // move camera slightly back on narrow screens so the cross fits comfortably
+        const baseZ = 2.2;
+        const extra = Math.max(0, (480 - w) / 480); // 0 when w >= 480
+        camera.position.z = baseZ + extra * 1.4;
+        camera.updateProjectionMatrix();
+      }
+
+      // lighting
+      scene.add(new THREE.HemisphereLight(0xa3dffb, 0x061022, 0.8));
+      const key = new THREE.DirectionalLight(0x8ee8ff, 1.0);
+      key.position.set(2, 3, 4);
+      scene.add(key);
+      const rim = new THREE.PointLight(0x22d3ee, 0.9, 6);
+      rim.position.set(-2.5, 1.8, -1.6);
+      scene.add(rim);
+
+      // materials
+      const shinyMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, metalness: 0.6, roughness: 0.18, emissive: 0x0b93c6, emissiveIntensity: 0.12 });
+      const softMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.0, roughness: 0.8, opacity:0.06, transparent:true });
+
+      // build a rounded-ish cross by combining boxes with slight chamfer via small bevel spheres
+      const cross = new THREE.Group();
+      const armLen = 0.9, armTh = 0.28, depth = 0.22;
+      const vertical = new THREE.Mesh(new THREE.BoxGeometry(armTh, armLen, depth), shinyMat);
+      const horizontal = new THREE.Mesh(new THREE.BoxGeometry(armLen, armTh, depth), shinyMat);
+      cross.add(vertical);
+      cross.add(horizontal);
+
+      // tiny edge spheres to smooth the silhouette
+      const sgeo = new THREE.SphereGeometry(armTh*0.52, 16, 12);
+      const sm1 = new THREE.Mesh(sgeo, shinyMat); sm1.position.set(0, armLen/2 - armTh*0.5, 0); cross.add(sm1);
+      const sm2 = sm1.clone(); sm2.position.set(0, -armLen/2 + armTh*0.5, 0); cross.add(sm2);
+      const sm3 = sm1.clone(); sm3.position.set(armLen/2 - armTh*0.5, 0, 0); cross.add(sm3);
+      const sm4 = sm3.clone(); sm4.position.set(-armLen/2 + armTh*0.5, 0, 0); cross.add(sm4);
+
+      cross.scale.set(1.05,1.05,1.05);
+      scene.add(cross);
+
+      // soft glow disk under the cross
+      const diskGeo = new THREE.CircleGeometry(1.15, 64);
+      const disk = new THREE.Mesh(diskGeo, new THREE.MeshBasicMaterial({ color:0x22d3ee, transparent:true, opacity:0.06 }));
+      disk.rotation.x = -Math.PI/2; disk.position.y = -0.45;
+      scene.add(disk);
+
+      // decorative torus (stethoscope-like arc)
+      const torus = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.03, 16, 120, Math.PI * 1.35), new THREE.MeshStandardMaterial({ color:0x38bdf8, metalness:0.8, roughness:0.15 }));
+      torus.rotation.x = Math.PI/2.2; torus.rotation.z = Math.PI/12; torus.position.y = 0.06; scene.add(torus);
+
+      // particle ring
+      const particleGroup = new THREE.Group();
+      const particleGeo = new THREE.SphereGeometry(0.0075, 8, 8);
+      const particleMat = new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.9 });
+      for(let i=0;i<120;i++){
+        const m = new THREE.Mesh(particleGeo, particleMat);
+        const r = 1.12 + Math.random()*0.45;
+        const a = Math.random()*Math.PI*2;
+        const y = (Math.random()-0.5)*0.6;
+        m.position.set(Math.cos(a)*r, y, Math.sin(a)*r);
+        particleGroup.add(m);
+      }
+      scene.add(particleGroup);
+
+      // animations
+      let t = 0; let mouseX=0, mouseY=0;
+      function animate(){
+        requestAnimationFrame(animate);
+        t += 0.01;
+        cross.rotation.y = Math.sin(t*0.6)*0.28 + (mouseX*0.18);
+        cross.rotation.x = Math.cos(t*0.4)*0.08 + (mouseY*0.06);
+        particleGroup.rotation.y += 0.0018;
+        torus.rotation.y += 0.0025;
+        disk.rotation.z += 0.0008;
+        renderer.render(scene,camera);
+      }
+      animate();
+
+      // resize handling (observe container size changes)
+      const ro = new ResizeObserver(()=>{ fitRendererToContainer(); });
+      ro.observe(container);
+      // initial fit
+      fitRendererToContainer();
+
+      // pointer-based parallax (works with mouse & touch)
+      function handlePointerMove(clientX, clientY){
+        const r = container.getBoundingClientRect();
+        const nx = (clientX - r.left)/r.width - 0.5; const ny = (clientY - r.top)/r.height - 0.5;
+        mouseX = nx; mouseY = -ny;
+        const card = document.getElementById('card');
+        card.style.transform = `rotateY(${nx*6}deg) rotateX(${ny*4}deg)`;
+      }
+      container.addEventListener('pointermove', (e)=>{ handlePointerMove(e.clientX, e.clientY); });
+      container.addEventListener('pointerleave', ()=>{ mouseX=0; mouseY=0; document.getElementById('card').style.transform='none';});
+
+      // -----------------------------
+      // Progress UI logic
+      // -----------------------------
+      const bar = document.getElementById('barInner');
+      const pct = document.getElementById('percent');
+      let progress = 0;
+
+      // simulate module loading with easing and small randomization to feel organic
+      function tick(){
+        if(progress >= 100) return;
+        const remaining = 100 - progress;
+        const step = Math.max(0.6, remaining * 0.06) * (0.85 + Math.random()*0.4);
+        progress = Math.min(100, +(progress + step).toFixed(1));
+        bar.style.width = progress + '%';
+        pct.textContent = `Loading ${Math.round(progress)}% — Mindspire`;
+        // slightly pulse the disk based on progress speed
+        disk.material.opacity = 0.06 + Math.abs(Math.sin(progress/10))*0.02;
+        if(progress < 100){ setTimeout(tick, 120 + Math.random()*180); } else { onComplete(); }
+      }
+      // start loading after small stagger for effect
+      setTimeout(tick, 280);
+
+      function onComplete(){
+        pct.textContent = 'Ready • Launching — Mindspire';
+        // gentle shining animation on cross
+        const shine = setInterval(()=>{ shinyMat.emissiveIntensity = 0.12 + Math.random()*0.18; }, 300);
+        // notify host (electron or other) that splash is done after short pause
+        setTimeout(()=>{
+          clearInterval(shine);
+          if(window.electronAPI && window.electronAPI.closeSplash) window.electronAPI.closeSplash();
+        }, 250);
+      }
+
+      // safety fallback: ensure splash doesn't hang longer than ~2s total
+      setTimeout(()=>{ progress = 100; bar.style.width = '100%'; pct.textContent = 'Ready • Launching — Mindspire'; if(window.electronAPI && window.electronAPI.closeSplash) window.electronAPI.closeSplash(); }, 2000);
+    </script>
+  </body>
+</html>

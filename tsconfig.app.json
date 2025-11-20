@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": false,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/Pharmacy components/*": [
+        "./src/components/Pharmacy components/*"
+      ],
+      "@/pharmacy utilites/*": [
+        "./src/pharmacy utilites/*"
+      ],
+      "@/services/*": [
+        "./src/Pharmacy services/*"
+      ]
+    }
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/pharmacy utilites/**",
+    "src/routes/ipdRoutes.tsx"
+  ]
+}
