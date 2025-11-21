@@ -9,6 +9,7 @@ const Category_1 = __importDefault(require("../lab models/Category"));
 const InventoryItem_1 = __importDefault(require("../lab models/InventoryItem"));
 const Notification_1 = __importDefault(require("../lab models/Notification"));
 const Finance_1 = __importDefault(require("../lab models/Finance"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Auth disabled for inventory endpoints (open access)
 // ----------------- Category CRUD -----------------
@@ -26,6 +27,7 @@ router.post("/categories", [(0, express_validator_1.body)("name").notEmpty().wit
     }
     try {
         const cat = await Category_1.default.create(req.body);
+        await (0, audit_1.logAudit)(req, "create_category", "LabCategory", { id: cat._id, name: cat.name });
         res.status(201).json(cat);
     }
     catch (err) {
@@ -138,6 +140,12 @@ router.post("/inventory", [
         catch (e) {
             console.warn("[Finance] Failed to log initial purchase expense", e);
         }
+        await (0, audit_1.logAudit)(req, "create_inventory_item", "LabInventoryItem", {
+            id: item._id,
+            name: item.name,
+            category: item.category,
+            supplier: item.supplier,
+        });
         res.status(201).json(item);
     }
     catch (err) {
@@ -215,6 +223,11 @@ router.put("/inventory/:id", async (req, res) => {
         catch (e) {
             console.warn("[Finance] Failed to log restock expense", e);
         }
+        await (0, audit_1.logAudit)(req, "update_inventory_item", "LabInventoryItem", {
+            id: updated._id,
+            name: updated.name,
+            supplier: updated.supplier,
+        });
         res.json(updated);
     }
     catch (err) {
@@ -229,6 +242,11 @@ router.delete("/inventory/:id", async (req, res) => {
             res.status(404).json({ message: "Item not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "delete_inventory_item", "LabInventoryItem", {
+            id: removed._id,
+            name: removed.name,
+            supplier: removed.supplier,
+        });
         res.json({});
     }
     catch (err) {

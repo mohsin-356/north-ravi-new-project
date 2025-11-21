@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "build:lab": "tsc -p tsconfig.lab.json"
+    "build:lab": "tsc -p tsconfig.lab.json",
+    "seed:lab-tests": "npx ts-node -T \"lab scripts/seedTests.ts\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

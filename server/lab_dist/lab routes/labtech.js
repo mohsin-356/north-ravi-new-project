@@ -15,23 +15,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -44,6 +34,7 @@ const InventoryItem_1 = __importDefault(require("../lab models/InventoryItem"));
 const path = __importStar(require("path"));
 const XLSX = __importStar(require("xlsx"));
 const Notification_1 = __importDefault(require("../lab models/Notification"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // No-op auth/role middleware
 const allowAll = (_req, _res, next) => next();
@@ -167,6 +158,11 @@ router.post("/tests", allowAll, [
         catch (e) {
             console.warn("[Notifications] Failed to create test add notification", e);
         }
+        await (0, audit_1.logAudit)(req, "create_test", "LabTest", {
+            id: test._id,
+            name: test.name,
+            category: test.category,
+        });
         res.status(201).json(test);
         return;
     }
@@ -185,6 +181,11 @@ router.put("/tests/:id", allowAll, async (req, res) => {
             res.status(404).json({ message: "Test not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "update_test", "LabTest", {
+            id: updated._id,
+            name: updated.name,
+            category: updated.category,
+        });
         res.json(updated);
         return;
     }
@@ -201,6 +202,11 @@ router.delete("/tests/:id", allowAll, async (req, res) => {
             res.status(404).json({ message: "Test not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "delete_test", "LabTest", {
+            id: removed._id,
+            name: removed.name,
+            category: removed.category,
+        });
         res.json({});
         return;
     }
@@ -244,6 +250,13 @@ router.post("/appointments", allowAll, [
             payload.date = new Date(payload.date);
         }
         const appt = await Appointment_1.default.create(payload);
+        await (0, audit_1.logAudit)(req, "create_appointment", "LabAppointment", {
+            id: appt._id,
+            patientName: appt.patientName,
+            date: appt.date,
+            time: appt.time,
+            type: appt.type,
+        });
         res.status(201).json(appt);
         return;
     }
@@ -381,6 +394,16 @@ router.post("/appointments/:id/samples", allowAll, async (req, res) => {
         // link sample id
         appointment.sampleId = sample._id;
         await appointment.save();
+        await (0, audit_1.logAudit)(req, "create_sample_for_appointment", "LabSample", {
+            sampleId: sample._id,
+            appointmentId: appointment._id,
+            patientName: appointment.patientName,
+            tests: testDocs.map(t => ({ id: t._id, name: t.name })),
+            totalAmount,
+            discount,
+            netAmount,
+            token,
+        });
         res.status(201).json({ appointment, sample });
         return;
     }
@@ -465,6 +488,11 @@ router.put("/samples/:id", allowAll, async (req, res) => {
                 console.error("[Notifications] Failed to create on completion", notifyErr);
             }
         }
+        await (0, audit_1.logAudit)(req, "update_sample", "LabSample", {
+            id: (updated === null || updated === void 0 ? void 0 : updated._id) || req.params.id,
+            status: update.status || (updated === null || updated === void 0 ? void 0 : updated.status),
+            hasResults: Array.isArray(results) && results.length > 0,
+        });
         res.json(updated);
         return;
     }
@@ -480,6 +508,11 @@ router.put("/appointments/:id/sample-intake", allowAll, async (req, res) => {
         const appt = await Appointment_1.default.findByIdAndUpdate(req.params.id, { status: "Sample Collected", sampleTakenAt: new Date() }, { new: true });
         if (!appt)
             return res.status(404).json({ message: "Appointment not found" });
+        await (0, audit_1.logAudit)(req, "sample_intake", "LabAppointment", {
+            id: appt._id,
+            patientName: appt.patientName,
+            status: appt.status,
+        });
         res.json(appt);
         return;
     }
@@ -499,6 +532,11 @@ router.put("/appointments/:id/complete", allowAll, async (req, res) => {
             res.status(404).json({ message: "Appointment not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "complete_appointment", "LabAppointment", {
+            appointmentId: updated._id,
+            reportId: report._id,
+            status: updated.status,
+        });
         res.json(updated);
         return;
     }
@@ -637,6 +675,14 @@ router.post("/samples", allowAll, async (req, res) => {
         catch (e) {
             console.warn("[POST /samples] Failed to decrement inventory for consumables:", e);
         }
+        await (0, audit_1.logAudit)(req, "create_sample", "LabSample", {
+            id: sample._id,
+            patientName: sample.patientName,
+            token: sample.token,
+            totalAmount: sample.totalAmount,
+            discount: sample.discount,
+            netAmount: sample.netAmount,
+        });
         res.status(201).json(sample);
         return;
     }
@@ -651,6 +697,11 @@ router.delete("/samples/:id", allowAll, async (req, res) => {
         const removed = await Sample_1.default.findByIdAndDelete(req.params.id);
         if (!removed)
             return res.status(404).json({ message: "Sample not found" });
+        await (0, audit_1.logAudit)(req, "delete_sample", "LabSample", {
+            id: removed._id,
+            patientName: removed.patientName,
+            token: removed.token,
+        });
         res.json({});
         return;
     }

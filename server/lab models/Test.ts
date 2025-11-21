@@ -13,12 +13,14 @@ export interface ITest extends Document {
     id: string;
     name: string;
     unit: string;
+    conventionalUnit?: string;
     normalRange: { min: number; max: number };
     // Optional textual normal ranges per group (e.g., "4 - 11", "150-400")
     normalRangeMale?: string | null;
     normalRangeFemale?: string | null;
     normalRangePediatric?: string | null;
     criticalRange?: { min: number; max: number };
+    referenceRangeText?: string | null;
   }[];
 }
 
@@ -36,6 +38,7 @@ const testSchema = new Schema<ITest>({
       id: String,
       name: String,
       unit: String,
+      conventionalUnit: { type: String, default: undefined },
       normalRangeMale: { type: String, default: null },
       normalRangeFemale: { type: String, default: null },
       normalRangePediatric: { type: String, default: null },
@@ -47,6 +50,7 @@ const testSchema = new Schema<ITest>({
         min: Number,
         max: Number,
       },
+      referenceRangeText: { type: String, default: null },
     },
   ],
 }, { timestamps: true });

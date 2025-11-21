@@ -3,6 +3,7 @@ import { body, validationResult } from "express-validator";
 import { verifyJWT, authorizeRoles } from "./localAuth";
 import Staff from "../lab models/Staff";
 import Attendance from "../lab models/Attendance";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -51,6 +52,11 @@ router.post(
     }
     try {
       const created = await Staff.create(req.body);
+      await logAudit(req as any, "create_staff", "LabStaff", {
+        id: (created as any)._id,
+        name: (created as any).name,
+        position: (created as any).position,
+      });
       res.status(201).json(created);
       return;
     } catch (err) {
@@ -69,6 +75,11 @@ router.put("/:id", async (req: Request, res: Response) => {
       res.status(404).json({ message: "Staff not found" });
       return;
     }
+    await logAudit(req as any, "update_staff", "LabStaff", {
+      id: (updated as any)._id,
+      name: (updated as any).name,
+      position: (updated as any).position,
+    });
     res.json(updated);
     return;
   } catch (err) {
@@ -85,6 +96,11 @@ router.delete("/:id", async (req: Request, res: Response) => {
       res.status(404).json({ message: "Staff not found" });
       return;
     }
+    await logAudit(req as any, "delete_staff", "LabStaff", {
+      id: (removed as any)._id,
+      name: (removed as any).name,
+      position: (removed as any).position,
+    });
     res.json({});
     return;
   } catch (err) {

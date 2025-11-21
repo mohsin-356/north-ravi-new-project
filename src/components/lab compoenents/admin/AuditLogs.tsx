@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { api } from "@/lib/api";
+import { api } from "@/lab lib/api";
 
 interface AuditLog {
   _id: string;
@@ -27,6 +28,41 @@ const AuditLogs: React.FC = () => {
 
   const skip = useMemo(() => (page - 1) * limit, [page, limit]);
 
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const parseDetails = (details: any): any => {
+    if (!details) return null;
+    if (typeof details === "string") {
+      try { return JSON.parse(details); } catch { return details; }
+    }
+    return details;
+  };
+
+  const DetailChips: React.FC<{ d: any }> = ({ d }) => {
+    if (!d || typeof d !== 'object') return <>{typeof d === 'string' ? d : '-'}</>;
+    const chips: Array<{ label: string; value?: string }> = [];
+    if (d.actor?.name) chips.push({ label: 'Actor', value: d.actor.name });
+    if (d.actor?.role) chips.push({ label: 'Role', value: d.actor.role });
+    if (d.method) chips.push({ label: 'Method', value: d.method });
+    if (d.path) chips.push({ label: 'Path', value: d.path });
+    if (d.ip) chips.push({ label: 'IP', value: d.ip });
+    if (d.id) chips.push({ label: 'ID', value: String(d.id) });
+    if (d.entityId) chips.push({ label: 'Entity', value: String(d.entityId) });
+    if (d.sampleId) chips.push({ label: 'Sample', value: String(d.sampleId) });
+    if (d.appointmentId) chips.push({ label: 'Appt', value: String(d.appointmentId) });
+    if (d.token) chips.push({ label: 'Token', value: String(d.token) });
+    if (d.name && !chips.find(c=>c.label==='Name')) chips.push({ label: 'Name', value: String(d.name) });
+    if (d.category) chips.push({ label: 'Category', value: String(d.category) });
+    if (d.status) chips.push({ label: 'Status', value: String(d.status) });
+    return (
+      <div className="flex flex-wrap gap-1">
+        {chips.map((c, i) => (
+          <Badge key={i} variant="secondary">{c.label}: {c.value}</Badge>
+        ))}
+      </div>
+    );
+  };
+
   const fetchLogs = async () => {
     setLoading(true);
     try {
@@ -35,7 +71,7 @@ const AuditLogs: React.FC = () => {
       if (action && action !== "all") params.action = action;
       if (from) params.from = from;
       if (to) params.to = to;
-      const { data } = await api.get('/audit-logs', { params });
+      const { data } = await api.get('/lab/audit', { params });
       const items: AuditLog[] = Array.isArray(data) ? data : (data?.items || data?.logs || []);
       const totalCount: number = Array.isArray(data) ? data.length : (data?.total || items.length || 0);
       setLogs(items);
@@ -132,15 +168,31 @@ const AuditLogs: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {logs.map((l) => (
-              <tr key={l._id} className="border-b align-top">
-                <td className="py-2 pr-4">{l.createdAt ? new Date(l.createdAt).toLocaleString() : "-"}</td>
-                <td className="py-2 pr-4">{l.action}</td>
-                <td className="py-2 pr-4">{l.entity}</td>
-                <td className="py-2 pr-4">{l.user || "system"}</td>
-                <td className="py-2 pr-4 whitespace-pre-wrap">{l.details ? (typeof l.details === 'string' ? l.details : JSON.stringify(l.details, null, 0)) : "-"}</td>
-              </tr>
-            ))}
+            {logs.map((l) => {
+              const d = parseDetails(l.details);
+              const isExpanded = expandedId === l._id;
+              return (
+                <tr key={l._id} className="border-b align-top">
+                  <td className="py-2 pr-4">{l.createdAt ? new Date(l.createdAt).toLocaleString() : "-"}</td>
+                  <td className="py-2 pr-4">{l.action}</td>
+                  <td className="py-2 pr-4">{l.entity}</td>
+                  <td className="py-2 pr-4">{l.user || "system"}</td>
+                  <td className="py-2 pr-4">
+                    <div className="space-y-1">
+                      <DetailChips d={d} />
+                      {(d && typeof d === 'object') && (
+                        <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setExpandedId(isExpanded ? null : l._id)}>
+                          {isExpanded ? 'Hide JSON' : 'View JSON'}
+                        </Button>
+                      )}
+                      {isExpanded && (
+                        <pre className="mt-1 max-h-44 overflow-auto bg-muted rounded p-2 text-xs whitespace-pre-wrap">{JSON.stringify(d, null, 2)}</pre>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {logs.length === 0 && (
               <tr>
                 <td colSpan={5} className="py-4 text-center text-muted-foreground">No logs</td>

@@ -6,6 +6,7 @@ import InventoryItem from "../lab models/InventoryItem";
 import * as path from "path";
 import * as XLSX from "xlsx";
 import Notification from "../lab models/Notification";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -145,6 +146,11 @@ router.post(
       } catch (e) {
         console.warn("[Notifications] Failed to create test add notification", e);
       }
+      await logAudit(req, "create_test", "LabTest", {
+        id: (test as any)._id,
+        name: (test as any).name,
+        category: (test as any).category,
+      });
       res.status(201).json(test);
       return;
     } catch (err) {
@@ -164,6 +170,11 @@ router.put("/tests/:id", allowAll, async (req, res) => {
       res.status(404).json({ message: "Test not found" });
       return;
     }
+    await logAudit(req, "update_test", "LabTest", {
+      id: (updated as any)._id,
+      name: (updated as any).name,
+      category: (updated as any).category,
+    });
     res.json(updated);
     return;
   } catch (err) {
@@ -180,6 +191,11 @@ router.delete("/tests/:id", allowAll, async (req, res) => {
       res.status(404).json({ message: "Test not found" });
       return;
     }
+    await logAudit(req, "delete_test", "LabTest", {
+      id: (removed as any)._id,
+      name: (removed as any).name,
+      category: (removed as any).category,
+    });
     res.json({});
     return;
   } catch (err) {
@@ -228,6 +244,13 @@ router.post(
         payload.date = new Date(payload.date);
       }
       const appt = await Appointment.create(payload);
+      await logAudit(req, "create_appointment", "LabAppointment", {
+        id: (appt as any)._id,
+        patientName: (appt as any).patientName,
+        date: (appt as any).date,
+        time: (appt as any).time,
+        type: (appt as any).type,
+      });
       res.status(201).json(appt);
       return;
     } catch (err) {
@@ -372,6 +395,17 @@ router.post("/appointments/:id/samples", allowAll, async (req, res) => {
     (appointment as any).sampleId = sample._id;
     await appointment.save();
 
+    await logAudit(req, "create_sample_for_appointment", "LabSample", {
+      sampleId: (sample as any)._id,
+      appointmentId: (appointment as any)._id,
+      patientName: (appointment as any).patientName,
+      tests: testDocs.map(t => ({ id: (t as any)._id, name: (t as any).name })),
+      totalAmount,
+      discount,
+      netAmount,
+      token,
+    });
+
     res.status(201).json({ appointment, sample });
     return;
   } catch (err) {
@@ -458,6 +492,13 @@ router.put("/samples/:id", allowAll, async (req, res) => {
         console.error("[Notifications] Failed to create on completion", notifyErr);
       }
     }
+
+    await logAudit(req, "update_sample", "LabSample", {
+      id: (updated as any)?._id || req.params.id,
+      status: update.status || (updated as any)?.status,
+      hasResults: Array.isArray(results) && results.length > 0,
+    });
+
     res.json(updated);
     return;
   } catch (err) {
@@ -476,6 +517,11 @@ router.put("/appointments/:id/sample-intake", allowAll, async (req, res) => {
       { new: true }
     );
     if (!appt) return res.status(404).json({ message: "Appointment not found" });
+    await logAudit(req, "sample_intake", "LabAppointment", {
+      id: (appt as any)._id,
+      patientName: (appt as any).patientName,
+      status: (appt as any).status,
+    });
     res.json(appt);
     return;
   } catch (err) {
@@ -499,6 +545,11 @@ router.put("/appointments/:id/complete", allowAll, async (req, res) => {
       res.status(404).json({ message: "Appointment not found" });
       return;
     }
+    await logAudit(req, "complete_appointment", "LabAppointment", {
+      appointmentId: (updated as any)._id,
+      reportId: (report as any)._id,
+      status: (updated as any).status,
+    });
     res.json(updated);
     return;
   } catch (err) {
@@ -634,6 +685,15 @@ router.post("/samples", allowAll, async (req, res) => {
       console.warn("[POST /samples] Failed to decrement inventory for consumables:", e);
     }
 
+    await logAudit(req, "create_sample", "LabSample", {
+      id: (sample as any)._id,
+      patientName: (sample as any).patientName,
+      token: (sample as any).token,
+      totalAmount: (sample as any).totalAmount,
+      discount: (sample as any).discount,
+      netAmount: (sample as any).netAmount,
+    });
+
     res.status(201).json(sample);
     return;
   } catch (err) {
@@ -647,6 +707,11 @@ router.delete("/samples/:id", allowAll, async (req, res) => {
   try {
     const removed = await Sample.findByIdAndDelete(req.params.id);
     if (!removed) return res.status(404).json({ message: "Sample not found" });
+    await logAudit(req, "delete_sample", "LabSample", {
+      id: (removed as any)._id,
+      patientName: (removed as any).patientName,
+      token: (removed as any).token,
+    });
     res.json({});
     return;
   } catch (err) {

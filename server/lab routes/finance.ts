@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import Sample from "../lab models/Sample";
 import Finance from "../lab models/Finance";
 import Test from "../lab models/Test";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -33,7 +34,7 @@ router.get("/income", async (_req: Request, res: Response): Promise<void> => {
 });
 
 // POST /finance/recompute-sample-amounts -> recompute totalAmount for existing samples
-router.post("/recompute-sample-amounts", async (_req: Request, res: Response): Promise<void> => {
+router.post("/recompute-sample-amounts", async (req: Request, res: Response): Promise<void> => {
   try {
     const samples = await Sample.find();
     let updated = 0;
@@ -49,6 +50,7 @@ router.post("/recompute-sample-amounts", async (_req: Request, res: Response): P
         }
       }
     }
+    await logAudit(req, "recompute_sample_amounts", "LabFinance", { updated });
     res.json({ message: "Recomputed sample amounts", updated });
   } catch (err) {
     console.error("Failed to recompute sample amounts", err);
@@ -72,6 +74,12 @@ router.post("/expense", async (req: Request, res: Response): Promise<void> => {
       reference
     });
     await newExpense.save();
+    await logAudit(req, "create_expense", "LabFinance", {
+      id: (newExpense as any)._id,
+      category,
+      amount,
+      reference,
+    });
     res.status(201).json(newExpense);
   } catch (err) {
     console.error("Failed to create expense", err);

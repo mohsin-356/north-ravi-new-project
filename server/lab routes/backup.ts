@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { performBackup, purgeData, restoreBackup } from "../lab utils/backup";
 import path from "path";
 import fs from "fs";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -10,6 +11,7 @@ router.post("/manual", async (_req: Request, res: Response): Promise<void> => {
   try {
     const filePath = await performBackup();
     const fileName = path.basename(filePath);
+    try { await logAudit(_req as any, "backup_manual", "LabBackup", { fileName }); } catch {}
     res.json({ fileName });
   } catch (err) {
     console.error("Manual backup failed", err);
@@ -32,6 +34,7 @@ router.get("/download/:fileName", (req: Request, res: Response): void => {
 router.post("/purge", async (_req: Request, res: Response): Promise<void> => {
   try {
     await purgeData();
+    try { await logAudit(_req as any, "backup_purge", "LabBackup", {}); } catch {}
     res.json({ message: "All data deleted" });
   } catch (err) {
     console.error("Purge failed", err);
@@ -47,6 +50,7 @@ router.post("/restore", async (req: Request, res: Response): Promise<void> => {
       return;
     }
     await restoreBackup(data);
+    try { await logAudit(req as any, "backup_restore", "LabBackup", { size: JSON.stringify(data).length }); } catch {}
     res.json({ message: "Data restored" });
   } catch (err) {
     console.error("Restore failed", err);

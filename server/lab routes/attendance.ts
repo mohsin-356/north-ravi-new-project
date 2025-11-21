@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { verifyJWT, authorizeRoles } from "./localAuth";
 import Staff from "../lab models/Staff";
 import Attendance, { IAttendance } from "../lab models/Attendance";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 router.use(verifyJWT, authorizeRoles(["labTech", "researcher"]));
@@ -48,6 +49,12 @@ router.post(
     }
     try {
       const created = await Attendance.create({ ...req.body, staffName: staff.name });
+      await logAudit(req as any, "create_attendance", "LabAttendance", {
+        id: (created as any)._id,
+        staffId: String(req.body.staffId),
+        date: req.body.date,
+        status: req.body.status,
+      });
       res.status(201).json(created);
       return;
     } catch (err:any) {
@@ -97,6 +104,12 @@ router.post(
         },
         { upsert: true, new: true }
       ).lean();
+      await logAudit(req as any, "clock_in", "LabAttendance", {
+        staffId,
+        date: today,
+        recordId: rec?._id,
+        checkIn: rec?.checkInTime,
+      });
       res.status(201).json({ ...rec, checkIn: rec?.checkInTime });
       return;
   }
@@ -155,6 +168,12 @@ router.post(
         },
         { upsert: true, new: true }
       ).lean();
+      await logAudit(req as any, "clock_out", "LabAttendance", {
+        staffId,
+        date: today,
+        recordId: rec?._id,
+        checkOut: rec?.checkOutTime,
+      });
       res.status(201).json({ ...rec, checkOut: rec?.checkOutTime });
       return;
   }

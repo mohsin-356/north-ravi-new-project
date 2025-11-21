@@ -4,6 +4,7 @@ import Category from "../lab models/Category";
 import InventoryItem from "../lab models/InventoryItem";
 import Notification from "../lab models/Notification";
 import Finance from "../lab models/Finance";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.post(
     if (!errors.isEmpty()) { res.status(400).json({ errors: errors.array() }); return; }
     try {
       const cat = await Category.create(req.body);
+      await logAudit(req, "create_category", "LabCategory", { id: (cat as any)._id, name: (cat as any).name });
       res.status(201).json(cat);
     } catch (err) {
       res.status(500).json({ message: "Failed to create category" });
@@ -138,6 +140,12 @@ router.post(
       } catch (e) {
         console.warn("[Finance] Failed to log initial purchase expense", e);
       }
+      await logAudit(req, "create_inventory_item", "LabInventoryItem", {
+        id: (item as any)._id,
+        name: (item as any).name,
+        category: (item as any).category,
+        supplier: (item as any).supplier,
+      });
       res.status(201).json(item);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -206,6 +214,11 @@ router.put("/inventory/:id", async (req: any, res: any): Promise<void> => {
     } catch (e) {
       console.warn("[Finance] Failed to log restock expense", e);
     }
+    await logAudit(req, "update_inventory_item", "LabInventoryItem", {
+      id: (updated as any)._id,
+      name: (updated as any).name,
+      supplier: (updated as any).supplier,
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Failed to update item" });
@@ -217,6 +230,11 @@ router.delete("/inventory/:id", async (req: any, res: any): Promise<void> => {
   try {
     const removed = await InventoryItem.findByIdAndDelete(req.params.id);
     if (!removed) { res.status(404).json({ message: "Item not found" }); return; }
+    await logAudit(req, "delete_inventory_item", "LabInventoryItem", {
+      id: (removed as any)._id,
+      name: (removed as any).name,
+      supplier: (removed as any).supplier,
+    });
     res.json({});
   } catch (err) {
     res.status(500).json({ message: "Failed to delete item" });

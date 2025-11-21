@@ -7,6 +7,7 @@ const express_1 = require("express");
 const Sample_1 = __importDefault(require("../lab models/Sample"));
 const Finance_1 = __importDefault(require("../lab models/Finance"));
 const Test_1 = __importDefault(require("../lab models/Test"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // GET /finance/income  -> total income from Sample.totalAmount (optionally per month)
 router.get("/income", async (_req, res) => {
@@ -36,7 +37,7 @@ router.get("/income", async (_req, res) => {
     }
 });
 // POST /finance/recompute-sample-amounts -> recompute totalAmount for existing samples
-router.post("/recompute-sample-amounts", async (_req, res) => {
+router.post("/recompute-sample-amounts", async (req, res) => {
     try {
         const samples = await Sample_1.default.find();
         let updated = 0;
@@ -52,6 +53,7 @@ router.post("/recompute-sample-amounts", async (_req, res) => {
                 }
             }
         }
+        await (0, audit_1.logAudit)(req, "recompute_sample_amounts", "LabFinance", { updated });
         res.json({ message: "Recomputed sample amounts", updated });
     }
     catch (err) {
@@ -75,6 +77,12 @@ router.post("/expense", async (req, res) => {
             reference
         });
         await newExpense.save();
+        await (0, audit_1.logAudit)(req, "create_expense", "LabFinance", {
+            id: newExpense._id,
+            category,
+            amount,
+            reference,
+        });
         res.status(201).json(newExpense);
     }
     catch (err) {

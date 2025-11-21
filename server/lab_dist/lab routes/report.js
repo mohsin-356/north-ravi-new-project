@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Report_1 = __importDefault(require("../lab models/Report"));
 const ReportTemplate_1 = __importDefault(require("../lab models/ReportTemplate"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Auth disabled for report routes
 const allowAll = (_req, _res, next) => next();
@@ -19,6 +20,7 @@ router.get("/reports", allowAll, async (_req, res) => {
 router.post("/reports", allowAll, async (req, res) => {
     try {
         const created = await Report_1.default.create(req.body);
+        await (0, audit_1.logAudit)(req, "create_report", "LabReport", { id: created._id, title: created.title });
         res.status(201).json(created);
     }
     catch (err) {
@@ -33,6 +35,7 @@ router.put("/reports/:id", allowAll, async (req, res) => {
             res.status(404).json({ message: "Report not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "update_report", "LabReport", { id: updated._id, title: updated.title });
         res.json(updated);
     }
     catch {
@@ -42,7 +45,8 @@ router.put("/reports/:id", allowAll, async (req, res) => {
 // Delete report — allowed for all three roles
 router.delete("/reports/:id", allowAll, async (req, res) => {
     try {
-        await Report_1.default.findByIdAndDelete(req.params.id);
+        const removed = await Report_1.default.findByIdAndDelete(req.params.id);
+        await (0, audit_1.logAudit)(req, "delete_report", "LabReport", { id: removed === null || removed === void 0 ? void 0 : removed._id });
         res.json({});
     }
     catch {
@@ -59,6 +63,7 @@ router.get("/report-templates", allowAll, async (_req, res) => {
 router.post("/report-templates", allowAll, async (req, res) => {
     try {
         const created = await ReportTemplate_1.default.create(req.body);
+        await (0, audit_1.logAudit)(req, "create_report_template", "LabReportTemplate", { id: created._id, name: created.name });
         res.status(201).json(created);
     }
     catch {
@@ -73,6 +78,7 @@ router.put("/report-templates/:id", allowAll, async (req, res) => {
             res.status(404).json({ message: "Template not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "update_report_template", "LabReportTemplate", { id: updated._id, name: updated.name });
         res.json(updated);
     }
     catch {
@@ -82,7 +88,8 @@ router.put("/report-templates/:id", allowAll, async (req, res) => {
 // Delete template — allowed for all three roles
 router.delete("/report-templates/:id", allowAll, async (req, res) => {
     try {
-        await ReportTemplate_1.default.findByIdAndDelete(req.params.id);
+        const removed = await ReportTemplate_1.default.findByIdAndDelete(req.params.id);
+        await (0, audit_1.logAudit)(req, "delete_report_template", "LabReportTemplate", { id: removed === null || removed === void 0 ? void 0 : removed._id });
         res.json({});
     }
     catch {

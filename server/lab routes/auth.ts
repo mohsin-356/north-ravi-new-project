@@ -3,6 +3,7 @@ import { body, validationResult } from "express-validator";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import User from "../lab models/User";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -23,6 +24,13 @@ const registerHandler = async (req: any, res: any): Promise<void> => {
     if (existing) { res.status(409).json({ message: "User exists" }); return; }
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ username, passwordHash, role });
+    await logAudit(req as any, "register", "LabAuth", {
+      id: (user as any)._id,
+      username: (user as any).username,
+      role: (user as any).role,
+      method: req.method,
+      path: req.originalUrl,
+    });
     res.status(201).json({ id: user._id });
     return;
   } catch (err) {
@@ -58,6 +66,13 @@ const loginHandler = async (req: any, res: any): Promise<void> => {
     const ok = await bcrypt.compare(password, (user as any).passwordHash);
     if (!ok) { res.status(401).json({ message: "Invalid credentials" }); return; }
     const token = jwt.sign({ uid: user._id, role: (user as any).role, username: (user as any).username }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
+    await logAudit(req as any, "login", "LabAuth", {
+      id: (user as any)._id,
+      username: (user as any).username,
+      role: (user as any).role,
+      method: req.method,
+      path: req.originalUrl,
+    });
     res.json({ token, role: (user as any).role });
     return;
   } catch (err) {

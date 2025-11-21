@@ -15,23 +15,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -40,7 +30,7 @@ const express_1 = require("express");
 const express_validator_1 = require("express-validator");
 const bcrypt = __importStar(require("bcryptjs"));
 const User_1 = __importDefault(require("../lab models/User"));
-const AuditLog_1 = __importDefault(require("../lab models/AuditLog"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Normalize role to backend canonical form
 const normalizeRole = (role) => {
@@ -72,7 +62,7 @@ const createHandler = async (req, res) => {
             return res.status(409).json({ message: "User exists" });
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await User_1.default.create({ username, passwordHash, role });
-        await AuditLog_1.default.create({ action: "create_user", entity: "LabUser", user: username, details: { role } });
+        await (0, audit_1.logAudit)(req, "create_user", "LabUser", { targetUsername: username, role });
         res.status(201).json({ id: user._id });
     }
     catch (err) {
@@ -97,7 +87,7 @@ const updateHandler = async (req, res) => {
         const prev = await User_1.default.findByIdAndUpdate(id, update, { new: true });
         if (!prev)
             return res.status(404).json({ message: "Not found" });
-        await AuditLog_1.default.create({ action: "update_user", entity: "LabUser", details: { id, role, changedPassword: Boolean(password) } });
+        await (0, audit_1.logAudit)(req, "update_user", "LabUser", { id, role, changedPassword: Boolean(password) });
         res.json({ ok: true });
     }
     catch (err) {
@@ -115,7 +105,7 @@ const deleteHandler = async (req, res) => {
         const user = await User_1.default.findByIdAndDelete(id);
         if (!user)
             return res.status(404).json({ message: "Not found" });
-        await AuditLog_1.default.create({ action: "delete_user", entity: "LabUser", details: { id, username: user.username } });
+        await (0, audit_1.logAudit)(req, "delete_user", "LabUser", { id, username: user.username });
         res.json({ ok: true });
     }
     catch (err) {

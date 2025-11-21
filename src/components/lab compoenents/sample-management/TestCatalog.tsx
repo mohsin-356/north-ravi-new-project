@@ -119,6 +119,8 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
     id: string;
     name: string;
     unit: string;
+    conventionalUnit?: string;
+    referenceRangeText?: string;
     normalMin: number;
     normalMax: number;
     criticalMin?: number;
@@ -259,7 +261,12 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
     id: p.id,
     name: p.name,
     unit: p.unit,
-    normalRange: { min: p.normalMin, max: p.normalMax },
+    conventionalUnit: (p as any).conventionalUnit,
+    referenceRangeText: (p as any).referenceRangeText,
+    normalRange: {
+      min: (p as any).normalMin ?? (p as any).normalRange?.min,
+      max: (p as any).normalMax ?? (p as any).normalRange?.max,
+    },
     criticalRange: p.criticalMin !== undefined && p.criticalMax !== undefined ? { min: p.criticalMin, max: p.criticalMax } : undefined,
   });
 

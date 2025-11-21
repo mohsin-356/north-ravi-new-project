@@ -3,6 +3,7 @@ import { verifyJWT, authorizeRoles } from "../middleware/auth";
 import Report from "../lab models/Report";
 import Appointment from "../lab models/Appointment";
 import Sample from "../lab models/Sample";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -14,6 +15,14 @@ router.post("/appointments", verifyJWT as any, authorizeRoles(["patient"]) as an
     const user = (req as any).user;
     const payload = { ...req.body, patientId: user.uid };
     const appointment = await Appointment.create(payload);
+    try {
+      await logAudit(req as any, "patient_book_appointment", "LabPatient", {
+        appointmentId: (appointment as any)._id,
+        patientId: user.uid,
+        date: (appointment as any).date,
+        time: (appointment as any).time,
+      });
+    } catch {}
     res.status(201).json(appointment);
     return;
   } catch (err) {
@@ -56,6 +65,13 @@ router.put("/appointments/:id/cancel", async (req: Request, res: Response) => {
     }
     appt.status = "Cancelled";
     await appt.save();
+    try {
+      await logAudit(req as any, "patient_cancel_appointment", "LabPatient", {
+        appointmentId: id,
+        patientId: user.uid,
+        status: appt.status,
+      });
+    } catch {}
     res.json(appt);
     return;
   } catch (err) {

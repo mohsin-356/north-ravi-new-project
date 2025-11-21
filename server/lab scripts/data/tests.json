@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Sample Test",
+    "category": "General",
+    "description": "Placeholder. Replace this file contents with your full dataset.",
+    "price": 0,
+    "sampleType": "blood",
+    "fastingRequired": false,
+    "parameters": [
+      {
+        "parameter": "Example Param",
+        "unit": "mg/dL",
+        "conventionalUnit": "mmol/L",
+        "referenceRange": "70 - 99 mg/dL"
+      }
+    ]
+  }
+]

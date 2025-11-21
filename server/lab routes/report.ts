@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Report from "../lab models/Report";
 import ReportTemplate from "../lab models/ReportTemplate";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.get("/reports", allowAll, async (_req: any, res: any): Promise<void> => {
 router.post("/reports", allowAll, async (req: any, res: any): Promise<void> => {
   try {
     const created = await Report.create(req.body);
+    await logAudit(req, "create_report", "LabReport", { id: (created as any)._id, title: (created as any).title });
     res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ message: "Failed to create report" });
@@ -29,6 +31,7 @@ router.put("/reports/:id", allowAll, async (req: any, res: any): Promise<void> =
   try {
     const updated = await Report.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) { res.status(404).json({ message: "Report not found" }); return; }
+    await logAudit(req, "update_report", "LabReport", { id: (updated as any)._id, title: (updated as any).title });
     res.json(updated);
   } catch { res.status(500).json({ message: "Failed to update report" }); }
 });
@@ -36,7 +39,8 @@ router.put("/reports/:id", allowAll, async (req: any, res: any): Promise<void> =
 // Delete report — allowed for all three roles
 router.delete("/reports/:id", allowAll, async (req: any, res: any): Promise<void> => {
   try {
-    await Report.findByIdAndDelete(req.params.id);
+    const removed = await Report.findByIdAndDelete(req.params.id);
+    await logAudit(req, "delete_report", "LabReport", { id: (removed as any)?._id });
     res.json({});
   } catch { res.status(500).json({ message: "Failed to delete report" }); }
 });
@@ -52,6 +56,7 @@ router.get("/report-templates", allowAll, async (_req: any, res: any): Promise<v
 router.post("/report-templates", allowAll, async (req: any, res: any): Promise<void> => {
   try {
     const created = await ReportTemplate.create(req.body);
+    await logAudit(req, "create_report_template", "LabReportTemplate", { id: (created as any)._id, name: (created as any).name });
     res.status(201).json(created);
   } catch { res.status(500).json({ message: "Failed to create template" }); }
 });
@@ -61,6 +66,7 @@ router.put("/report-templates/:id", allowAll, async (req: any, res: any): Promis
   try {
     const updated = await ReportTemplate.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) { res.status(404).json({ message: "Template not found" }); return; }
+    await logAudit(req, "update_report_template", "LabReportTemplate", { id: (updated as any)._id, name: (updated as any).name });
     res.json(updated);
   } catch { res.status(500).json({ message: "Failed to update template" }); }
 });
@@ -68,7 +74,8 @@ router.put("/report-templates/:id", allowAll, async (req: any, res: any): Promis
 // Delete template — allowed for all three roles
 router.delete("/report-templates/:id", allowAll, async (req: any, res: any): Promise<void> => {
   try {
-    await ReportTemplate.findByIdAndDelete(req.params.id);
+    const removed = await ReportTemplate.findByIdAndDelete(req.params.id);
+    await logAudit(req, "delete_report_template", "LabReportTemplate", { id: (removed as any)?._id });
     res.json({});
   } catch { res.status(500).json({ message: "Failed to delete template" }); }
 });

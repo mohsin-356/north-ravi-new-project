@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Notification from "../lab models/Notification";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -55,6 +56,12 @@ router.patch("/:id/read", async (req: any, res: any) => {
     }
     notif.read = true;
     await notif.save();
+    try {
+      await logAudit(req as any, "read_notification", "LabNotification", {
+        id: (notif as any)._id,
+        title: (notif as any).title,
+      });
+    } catch {}
     res.json(notif);
     return;
   } catch {

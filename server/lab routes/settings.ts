@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import Setting from "../lab models/Setting";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -65,6 +66,12 @@ router.put("/", async (req: Request, res: Response) => {
       upsert: true,
       runValidators: true,
     });
+    try {
+      await logAudit(req as any, "update_settings", "LabSettings", {
+        labName: updateDoc?.lab?.labName,
+        hasPricing: !!updateDoc?.pricing,
+      });
+    } catch {}
     // Mirror field for backward compatibility in response
     const resp: any = updated?.toObject ? updated.toObject() : updated;
     if (resp?.pricing) {

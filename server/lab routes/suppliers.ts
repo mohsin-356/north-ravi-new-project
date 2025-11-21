@@ -4,6 +4,7 @@ import { body, validationResult } from "express-validator";
 import Supplier from "../lab models/Supplier";
 import InventoryItem from "../lab models/InventoryItem";
 import Finance from "../lab models/Finance";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -65,6 +66,11 @@ router.post(
     if (!errors.isEmpty()) { res.status(400).json({ errors: errors.array() }); return; }
     try {
       const created = await Supplier.create(req.body);
+      await logAudit(req as any, "create_supplier", "LabSupplier", {
+        id: (created as any)._id,
+        name: (created as any).name,
+        company: (created as any).company,
+      });
       res.status(201).json(created);
     } catch (err) {
       res.status(500).json({ message: "Failed to create supplier" });
@@ -84,6 +90,11 @@ router.put("/:id", async (req: any, res: any) => {
   try {
     const updated = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) { res.status(404).json({ message: "Supplier not found" }); return; }
+    await logAudit(req as any, "update_supplier", "LabSupplier", {
+      id: (updated as any)._id,
+      name: (updated as any).name,
+      company: (updated as any).company,
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Failed to update supplier" });
@@ -95,6 +106,11 @@ router.delete("/:id", async (req: any, res: any) => {
   try {
     const removed = await Supplier.findByIdAndDelete(req.params.id);
     if (!removed) { res.status(404).json({ message: "Supplier not found" }); return; }
+    await logAudit(req as any, "delete_supplier", "LabSupplier", {
+      id: (removed as any)._id,
+      name: (removed as any).name,
+      company: (removed as any).company,
+    });
     res.json({});
   } catch (err) {
     res.status(500).json({ message: "Failed to delete supplier" });

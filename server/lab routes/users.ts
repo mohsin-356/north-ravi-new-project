@@ -2,7 +2,7 @@ import { Router } from "express";
 import { body, param, validationResult } from "express-validator";
 import * as bcrypt from "bcryptjs";
 import LabUser from "../lab models/User";
-import AuditLog from "../lab models/AuditLog";
+import { logAudit } from "../lab utils/audit";
 
 const router = Router();
 
@@ -34,7 +34,7 @@ const createHandler = async (req: any, res: any) => {
     if (existing) return res.status(409).json({ message: "User exists" });
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await LabUser.create({ username, passwordHash, role });
-    await AuditLog.create({ action: "create_user", entity: "LabUser", user: username, details: { role } });
+    await logAudit(req, "create_user", "LabUser", { targetUsername: username, role });
     res.status(201).json({ id: user._id });
   } catch (err) {
     console.error("[lab/users] create error", err);
@@ -55,7 +55,7 @@ const updateHandler = async (req: any, res: any) => {
     if (password) update.passwordHash = await bcrypt.hash(password, 10);
     const prev = await LabUser.findByIdAndUpdate(id, update, { new: true });
     if (!prev) return res.status(404).json({ message: "Not found" });
-    await AuditLog.create({ action: "update_user", entity: "LabUser", details: { id, role, changedPassword: Boolean(password) } });
+    await logAudit(req, "update_user", "LabUser", { id, role, changedPassword: Boolean(password) });
     res.json({ ok: true });
   } catch (err) {
     console.error("[lab/users] update error", err);
@@ -71,7 +71,7 @@ const deleteHandler = async (req: any, res: any) => {
     const { id } = req.params as { id: string };
     const user = await LabUser.findByIdAndDelete(id);
     if (!user) return res.status(404).json({ message: "Not found" });
-    await AuditLog.create({ action: "delete_user", entity: "LabUser", details: { id, username: (user as any).username } });
+    await logAudit(req, "delete_user", "LabUser", { id, username: (user as any).username });
     res.json({ ok: true });
   } catch (err) {
     console.error("[lab/users] delete error", err);
