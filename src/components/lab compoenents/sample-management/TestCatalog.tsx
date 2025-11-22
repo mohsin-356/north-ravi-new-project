@@ -164,6 +164,26 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
     normalRangePediatric?: string;
   }
 
+  const toParamInput = (p: any): ParameterInput => ({
+    id: p.id || '',
+    name: p.name || '',
+    unit: p.unit || '',
+    conventionalUnit: p.conventionalUnit,
+    referenceRangeText: p.referenceRangeText,
+    normalMin: typeof p.normalMin === 'number' ? p.normalMin : (typeof p?.normalRange?.min === 'number' ? p.normalRange.min : 0),
+    normalMax: typeof p.normalMax === 'number' ? p.normalMax : (typeof p?.normalRange?.max === 'number' ? p.normalRange.max : 0),
+    criticalMin: typeof p.criticalMin === 'number' ? p.criticalMin : (typeof p?.criticalRange?.min === 'number' ? p.criticalRange.min : undefined),
+    criticalMax: typeof p.criticalMax === 'number' ? p.criticalMax : (typeof p?.criticalRange?.max === 'number' ? p.criticalRange.max : undefined),
+    normalRangeMale: p.normalRangeMale || undefined,
+    normalRangeFemale: p.normalRangeFemale || undefined,
+    normalRangePediatric: p.normalRangePediatric || undefined,
+  });
+
+  const prepareTestForEdit = (t: any) => ({
+    ...t,
+    parameters: Array.isArray((t as any).parameters) ? (t as any).parameters.map(toParamInput) : [],
+  });
+
   const [newTest, setNewTest] = useState({
     name: "",
     category: "",
@@ -839,7 +859,7 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setEditingTest(test)}
+                  onClick={() => setEditingTest(prepareTestForEdit(test))}
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
