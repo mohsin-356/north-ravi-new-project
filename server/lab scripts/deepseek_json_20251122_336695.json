@@ -1,0 +1,860 @@
+{
+  "laboratoryTests": [
+    {
+      "name": "A ACE (Angiotensin Converting Enzyme) Emergency",
+      "category": "A",
+      "description": "A ACE (Angiotensin Converting Enzyme) Emergency",
+      "price": 2800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Angiotensin Converting Enzyme (ACE)",
+          "unit": "U/L",
+          "conventionalUnit": "U/L",
+          "referenceRange": "8 - 53 U/L",
+          "normalMin": 8,
+          "normalMax": 53,
+          "criticalMin": 5,
+          "criticalMax": 100
+        }
+      ]
+    },
+    {
+      "name": "A APTT",
+      "category": "A",
+      "description": "A APTT",
+      "price": 4400,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Activated Partial Thromboplastin Time (APTT)",
+          "unit": "seconds",
+          "conventionalUnit": "sec",
+          "referenceRange": "25 - 35 seconds",
+          "normalMin": 25,
+          "normalMax": 35,
+          "criticalMin": 20,
+          "criticalMax": 100
+        },
+        {
+          "parameter": "APTT Ratio",
+          "unit": "",
+          "conventionalUnit": "",
+          "referenceRange": "< 1.2",
+          "normalMin": 0.8,
+          "normalMax": 1.2,
+          "criticalMin": 0.5,
+          "criticalMax": 2.5
+        }
+      ]
+    },
+    {
+      "name": "A Alpha Fetoprotein (AFP) FLUID",
+      "category": "A",
+      "description": "A Alpha Fetoprotein (AFP) FLUID",
+      "price": 2000,
+      "sampleType": "other",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Alpha Fetoprotein (AFP)",
+          "unit": "ng/mL",
+          "conventionalUnit": "ng/mL",
+          "referenceRange": "< 8.5 ng/mL",
+          "normalMin": 0,
+          "normalMax": 8.5,
+          "criticalMin": 0,
+          "criticalMax": 500
+        }
+      ]
+    },
+    {
+      "name": "A Aminophylline/Theophylline",
+      "category": "A",
+      "description": "A Aminophylline/Theophylline",
+      "price": 1800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Theophylline Level",
+          "unit": "mcg/mL",
+          "conventionalUnit": "mcg/mL",
+          "referenceRange": "10 - 20 mcg/mL",
+          "normalMin": 10,
+          "normalMax": 20,
+          "criticalMin": 5,
+          "criticalMax": 30
+        }
+      ]
+    },
+    {
+      "name": "ABGs (Arterial Blood Gasses)",
+      "category": "A",
+      "description": "ABGs (Arterial Blood Gasses)",
+      "price": 1800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "pH",
+          "unit": "",
+          "conventionalUnit": "",
+          "referenceRange": "7.35 - 7.45",
+          "normalMin": 7.35,
+          "normalMax": 7.45,
+          "criticalMin": 7.2,
+          "criticalMax": 7.6
+        },
+        {
+          "parameter": "pCO2",
+          "unit": "mmHg",
+          "conventionalUnit": "mmHg",
+          "referenceRange": "35 - 45 mmHg",
+          "normalMin": 35,
+          "normalMax": 45,
+          "criticalMin": 20,
+          "criticalMax": 70
+        },
+        {
+          "parameter": "pO2",
+          "unit": "mmHg",
+          "conventionalUnit": "mmHg",
+          "referenceRange": "75 - 100 mmHg",
+          "normalMin": 75,
+          "normalMax": 100,
+          "criticalMin": 50,
+          "criticalMax": 120
+        },
+        {
+          "parameter": "HCO3",
+          "unit": "mEq/L",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "22 - 28 mEq/L",
+          "normalMin": 22,
+          "normalMax": 28,
+          "criticalMin": 15,
+          "criticalMax": 40
+        },
+        {
+          "parameter": "Base Excess",
+          "unit": "mEq/L",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "-2 to +2 mEq/L",
+          "normalMin": -2,
+          "normalMax": 2,
+          "criticalMin": -10,
+          "criticalMax": 10
+        }
+      ]
+    },
+    {
+      "name": "AC Albumin Emergency",
+      "category": "A",
+      "description": "AC Albumin Emergency",
+      "price": 550,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Albumin",
+          "unit": "g/dL",
+          "conventionalUnit": "g/L",
+          "referenceRange": "3.5 - 5.0 g/dL",
+          "normalMin": 3.5,
+          "normalMax": 5.0,
+          "criticalMin": 2.0,
+          "criticalMax": 6.0
+        }
+      ]
+    },
+    {
+      "name": "ACE ANA BY ELISA Virtual Clinic",
+      "category": "A",
+      "description": "ACE ANA BY ELISA Virtual Clinic",
+      "price": 2350,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Anti-Nuclear Antibody (ANA) by ELISA",
+          "unit": "U/mL",
+          "conventionalUnit": "U/mL",
+          "referenceRange": "< 1.0 U/mL (Negative)",
+          "normalMin": 0,
+          "normalMax": 1.0,
+          "criticalMin": 0,
+          "criticalMax": 5.0
+        }
+      ]
+    },
+    {
+      "name": "ACTH Virtual Clinic",
+      "category": "A",
+      "description": "ACTH Virtual Clinic",
+      "price": 3000,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Adrenocorticotropic Hormone (ACTH)",
+          "unit": "pg/mL",
+          "conventionalUnit": "pg/mL",
+          "referenceRange": "7.2 - 63.3 pg/mL",
+          "normalMin": 7.2,
+          "normalMax": 63.3,
+          "criticalMin": 5.0,
+          "criticalMax": 100
+        }
+      ]
+    },
+    {
+      "name": "ADA Anti Transglutaminase IgM",
+      "category": "A",
+      "description": "ADA Anti Transglutaminase IgM",
+      "price": 2600,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Anti-Tissue Transglutaminase IgM",
+          "unit": "U/mL",
+          "conventionalUnit": "U/mL",
+          "referenceRange": "< 20 U/mL (Negative)",
+          "normalMin": 0,
+          "normalMax": 20,
+          "criticalMin": 0,
+          "criticalMax": 50
+        }
+      ]
+    },
+    {
+      "name": "AFB C/S (Any Specimen)",
+      "category": "A",
+      "description": "AFB C/S (Any Specimen)",
+      "price": 5500,
+      "sampleType": "other",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Acid-Fast Bacilli Culture",
+          "unit": "",
+          "conventionalUnit": "",
+          "referenceRange": "Negative (No growth)",
+          "normalMin": null,
+          "normalMax": null,
+          "criticalMin": null,
+          "criticalMax": null
+        },
+        {
+          "parameter": "Sensitivity",
+          "unit": "",
+          "conventionalUnit": "",
+          "referenceRange": "Reported if positive",
+          "normalMin": null,
+          "normalMax": null,
+          "criticalMin": null,
+          "criticalMax": null
+        }
+      ]
+    },
+    {
+      "name": "CBC CBC ( Complete Blood Count )",
+      "category": "C",
+      "description": "CBC CBC ( Complete Blood Count )",
+      "price": 6000,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Red Blood Cell Count (RBC)",
+          "unit": "×10¹²/L",
+          "conventionalUnit": "million/µL",
+          "referenceRange": "Male: 4.35 - 5.65 ×10¹²/L, Female: 3.92 - 5.13 ×10¹²/L",
+          "normalMin": 4.0,
+          "normalMax": 6.0,
+          "criticalMin": 2.0,
+          "criticalMax": 7.0
+        },
+        {
+          "parameter": "Hemoglobin (Hb)",
+          "unit": "g/dL",
+          "conventionalUnit": "g/L",
+          "referenceRange": "Male: 13.2 - 16.6 g/dL, Female: 11.6 - 15 g/dL",
+          "normalMin": 12.0,
+          "normalMax": 17.0,
+          "criticalMin": 7.0,
+          "criticalMax": 20.0
+        },
+        {
+          "parameter": "Hematocrit (Hct)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "Male: 38.3 - 48.6%, Female: 35.5 - 44.9%",
+          "normalMin": 35,
+          "normalMax": 50,
+          "criticalMin": 20,
+          "criticalMax": 60
+        },
+        {
+          "parameter": "White Blood Cell Count (WBC)",
+          "unit": "×10⁹/L",
+          "conventionalUnit": "thousand/µL",
+          "referenceRange": "3.4 - 9.6 ×10⁹/L",
+          "normalMin": 3.4,
+          "normalMax": 9.6,
+          "criticalMin": 1.0,
+          "criticalMax": 30.0
+        },
+        {
+          "parameter": "Platelet Count",
+          "unit": "×10⁹/L",
+          "conventionalUnit": "thousand/µL",
+          "referenceRange": "Male: 135 - 317 ×10⁹/L, Female: 157 - 371 ×10⁹/L",
+          "normalMin": 150,
+          "normalMax": 400,
+          "criticalMin": 50,
+          "criticalMax": 1000
+        },
+        {
+          "parameter": "Mean Corpuscular Volume (MCV)",
+          "unit": "fL",
+          "conventionalUnit": "µm³",
+          "referenceRange": "80 - 100 fL",
+          "normalMin": 80,
+          "normalMax": 100,
+          "criticalMin": 60,
+          "criticalMax": 120
+        },
+        {
+          "parameter": "Mean Corpuscular Hemoglobin (MCH)",
+          "unit": "pg",
+          "conventionalUnit": "pg",
+          "referenceRange": "27 - 33 pg",
+          "normalMin": 27,
+          "normalMax": 33,
+          "criticalMin": 20,
+          "criticalMax": 40
+        },
+        {
+          "parameter": "Mean Corpuscular Hemoglobin Concentration (MCHC)",
+          "unit": "g/dL",
+          "conventionalUnit": "g/L",
+          "referenceRange": "32 - 36 g/dL",
+          "normalMin": 32,
+          "normalMax": 36,
+          "criticalMin": 28,
+          "criticalMax": 38
+        },
+        {
+          "parameter": "Red Cell Distribution Width (RDW)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "11.5 - 14.5%",
+          "normalMin": 11.5,
+          "normalMax": 14.5,
+          "criticalMin": 10,
+          "criticalMax": 20
+        },
+        {
+          "parameter": "Neutrophils (%)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "40 - 75%",
+          "normalMin": 40,
+          "normalMax": 75,
+          "criticalMin": 20,
+          "criticalMax": 85
+        },
+        {
+          "parameter": "Lymphocytes (%)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "20 - 45%",
+          "normalMin": 20,
+          "normalMax": 45,
+          "criticalMin": 10,
+          "criticalMax": 60
+        },
+        {
+          "parameter": "Monocytes (%)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "2 - 10%",
+          "normalMin": 2,
+          "normalMax": 10,
+          "criticalMin": 1,
+          "criticalMax": 15
+        },
+        {
+          "parameter": "Eosinophils (%)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "1 - 6%",
+          "normalMin": 1,
+          "normalMax": 6,
+          "criticalMin": 0,
+          "criticalMax": 10
+        },
+        {
+          "parameter": "Basophils (%)",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "0 - 2%",
+          "normalMin": 0,
+          "normalMax": 2,
+          "criticalMin": 0,
+          "criticalMax": 5
+        }
+      ]
+    },
+    {
+      "name": "THYROID FUNCTION TEST",
+      "category": "T",
+      "description": "THYROID FUNCTION TEST",
+      "price": 4500,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "TSH",
+          "unit": "µIU/mL",
+          "conventionalUnit": "mIU/L",
+          "referenceRange": "0.4 - 4.0 µIU/mL",
+          "normalMin": 0.4,
+          "normalMax": 4.0,
+          "criticalMin": 0.1,
+          "criticalMax": 10.0
+        },
+        {
+          "parameter": "Free T4",
+          "unit": "ng/dL",
+          "conventionalUnit": "pmol/L",
+          "referenceRange": "0.8 - 1.8 ng/dL",
+          "normalMin": 0.8,
+          "normalMax": 1.8,
+          "criticalMin": 0.5,
+          "criticalMax": 3.0
+        },
+        {
+          "parameter": "Free T3",
+          "unit": "pg/mL",
+          "conventionalUnit": "pmol/L",
+          "referenceRange": "2.3 - 4.2 pg/mL",
+          "normalMin": 2.3,
+          "normalMax": 4.2,
+          "criticalMin": 1.5,
+          "criticalMax": 6.0
+        }
+      ]
+    },
+    {
+      "name": "LFT (Liver Function Tests)",
+      "category": "L",
+      "description": "Liver Function Tests Panel",
+      "price": 2500,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "ALT (SGPT)",
+          "unit": "U/L",
+          "conventionalUnit": "U/L",
+          "referenceRange": "7 - 55 U/L",
+          "normalMin": 7,
+          "normalMax": 55,
+          "criticalMin": 5,
+          "criticalMax": 300
+        },
+        {
+          "parameter": "AST (SGOT)",
+          "unit": "U/L",
+          "conventionalUnit": "U/L",
+          "referenceRange": "8 - 48 U/L",
+          "normalMin": 8,
+          "normalMax": 48,
+          "criticalMin": 5,
+          "criticalMax": 250
+        },
+        {
+          "parameter": "ALP (Alkaline Phosphatase)",
+          "unit": "U/L",
+          "conventionalUnit": "U/L",
+          "referenceRange": "44 - 147 U/L",
+          "normalMin": 44,
+          "normalMax": 147,
+          "criticalMin": 30,
+          "criticalMax": 500
+        },
+        {
+          "parameter": "Total Bilirubin",
+          "unit": "mg/dL",
+          "conventionalUnit": "µmol/L",
+          "referenceRange": "0.1 - 1.2 mg/dL",
+          "normalMin": 0.1,
+          "normalMax": 1.2,
+          "criticalMin": 0.1,
+          "criticalMax": 5.0
+        },
+        {
+          "parameter": "Direct Bilirubin",
+          "unit": "mg/dL",
+          "conventionalUnit": "µmol/L",
+          "referenceRange": "0.0 - 0.3 mg/dL",
+          "normalMin": 0.0,
+          "normalMax": 0.3,
+          "criticalMin": 0.0,
+          "criticalMax": 2.0
+        },
+        {
+          "parameter": "Total Protein",
+          "unit": "g/dL",
+          "conventionalUnit": "g/L",
+          "referenceRange": "6.3 - 7.9 g/dL",
+          "normalMin": 6.3,
+          "normalMax": 7.9,
+          "criticalMin": 5.0,
+          "criticalMax": 9.0
+        },
+        {
+          "parameter": "Albumin",
+          "unit": "g/dL",
+          "conventionalUnit": "g/L",
+          "referenceRange": "3.5 - 5.0 g/dL",
+          "normalMin": 3.5,
+          "normalMax": 5.0,
+          "criticalMin": 2.0,
+          "criticalMax": 6.0
+        }
+      ]
+    },
+    {
+      "name": "RFT (Renal Function Tests)",
+      "category": "R",
+      "description": "Renal Function Tests Panel",
+      "price": 1800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Blood Urea Nitrogen (BUN)",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "7 - 20 mg/dL",
+          "normalMin": 7,
+          "normalMax": 20,
+          "criticalMin": 5,
+          "criticalMax": 100
+        },
+        {
+          "parameter": "Creatinine",
+          "unit": "mg/dL",
+          "conventionalUnit": "µmol/L",
+          "referenceRange": "Male: 0.74 - 1.35 mg/dL, Female: 0.59 - 1.04 mg/dL",
+          "normalMin": 0.5,
+          "normalMax": 1.4,
+          "criticalMin": 0.3,
+          "criticalMax": 5.0
+        },
+        {
+          "parameter": "Uric Acid",
+          "unit": "mg/dL",
+          "conventionalUnit": "µmol/L",
+          "referenceRange": "Male: 3.4 - 7.0 mg/dL, Female: 2.4 - 6.0 mg/dL",
+          "normalMin": 2.4,
+          "normalMax": 7.0,
+          "criticalMin": 2.0,
+          "criticalMax": 10.0
+        },
+        {
+          "parameter": "Sodium (Na+)",
+          "unit": "mmol/L",
+          "conventionalUnit": "mEq/L",
+          "referenceRange": "135 - 145 mmol/L",
+          "normalMin": 135,
+          "normalMax": 145,
+          "criticalMin": 120,
+          "criticalMax": 160
+        },
+        {
+          "parameter": "Potassium (K+)",
+          "unit": "mmol/L",
+          "conventionalUnit": "mEq/L",
+          "referenceRange": "3.5 - 5.1 mmol/L",
+          "normalMin": 3.5,
+          "normalMax": 5.1,
+          "criticalMin": 2.5,
+          "criticalMax": 6.5
+        },
+        {
+          "parameter": "Chloride (Cl-)",
+          "unit": "mmol/L",
+          "conventionalUnit": "mEq/L",
+          "referenceRange": "98 - 107 mmol/L",
+          "normalMin": 98,
+          "normalMax": 107,
+          "criticalMin": 80,
+          "criticalMax": 120
+        }
+      ]
+    },
+    {
+      "name": "Lipid Profile",
+      "category": "L",
+      "description": "Lipid Profile Panel",
+      "price": 2200,
+      "sampleType": "blood",
+      "fastingRequired": true,
+      "parameters": [
+        {
+          "parameter": "Total Cholesterol",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "< 200 mg/dL",
+          "normalMin": 0,
+          "normalMax": 200,
+          "criticalMin": 0,
+          "criticalMax": 300
+        },
+        {
+          "parameter": "Triglycerides",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "< 150 mg/dL",
+          "normalMin": 0,
+          "normalMax": 150,
+          "criticalMin": 0,
+          "criticalMax": 500
+        },
+        {
+          "parameter": "HDL Cholesterol",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "> 40 mg/dL",
+          "normalMin": 40,
+          "normalMax": 100,
+          "criticalMin": 20,
+          "criticalMax": 120
+        },
+        {
+          "parameter": "LDL Cholesterol",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "< 100 mg/dL",
+          "normalMin": 0,
+          "normalMax": 100,
+          "criticalMin": 0,
+          "criticalMax": 190
+        },
+        {
+          "parameter": "VLDL Cholesterol",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "2 - 30 mg/dL",
+          "normalMin": 2,
+          "normalMax": 30,
+          "criticalMin": 0,
+          "criticalMax": 50
+        }
+      ]
+    },
+    {
+      "name": "Diabetes Panel",
+      "category": "D",
+      "description": "Diabetes Monitoring Panel",
+      "price": 3200,
+      "sampleType": "blood",
+      "fastingRequired": true,
+      "parameters": [
+        {
+          "parameter": "Fasting Blood Glucose",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "70 - 99 mg/dL",
+          "normalMin": 70,
+          "normalMax": 99,
+          "criticalMin": 50,
+          "criticalMax": 300
+        },
+        {
+          "parameter": "HbA1c",
+          "unit": "%",
+          "conventionalUnit": "%",
+          "referenceRange": "4.0 - 5.6%",
+          "normalMin": 4.0,
+          "normalMax": 5.6,
+          "criticalMin": 3.5,
+          "criticalMax": 15.0
+        },
+        {
+          "parameter": "Post Prandial Glucose (2-hr)",
+          "unit": "mg/dL",
+          "conventionalUnit": "mmol/L",
+          "referenceRange": "< 140 mg/dL",
+          "normalMin": 70,
+          "normalMax": 140,
+          "criticalMin": 50,
+          "criticalMax": 300
+        }
+      ]
+    },
+    {
+      "name": "Cardiac Markers",
+      "category": "C",
+      "description": "Cardiac Enzymes and Markers",
+      "price": 4500,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Troponin I",
+          "unit": "ng/mL",
+          "conventionalUnit": "µg/L",
+          "referenceRange": "< 0.04 ng/mL",
+          "normalMin": 0,
+          "normalMax": 0.04,
+          "criticalMin": 0,
+          "criticalMax": 0.5
+        },
+        {
+          "parameter": "CK-MB",
+          "unit": "ng/mL",
+          "conventionalUnit": "µg/L",
+          "referenceRange": "< 5 ng/mL",
+          "normalMin": 0,
+          "normalMax": 5,
+          "criticalMin": 0,
+          "criticalMax": 25
+        },
+        {
+          "parameter": "CPK/CK",
+          "unit": "U/L",
+          "conventionalUnit": "U/L",
+          "referenceRange": "24 - 195 U/L",
+          "normalMin": 24,
+          "normalMax": 195,
+          "criticalMin": 20,
+          "criticalMax": 1000
+        },
+        {
+          "parameter": "NT-proBNP",
+          "unit": "pg/mL",
+          "conventionalUnit": "pmol/L",
+          "referenceRange": "< 125 pg/mL (<75 years)",
+          "normalMin": 0,
+          "normalMax": 125,
+          "criticalMin": 0,
+          "criticalMax": 1000
+        }
+      ]
+    },
+    {
+      "name": "Coagulation Profile",
+      "category": "C",
+      "description": "Blood Coagulation Tests",
+      "price": 3800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "Prothrombin Time (PT)",
+          "unit": "seconds",
+          "conventionalUnit": "sec",
+          "referenceRange": "9.4 - 12.5 seconds",
+          "normalMin": 9.4,
+          "normalMax": 12.5,
+          "criticalMin": 8,
+          "criticalMax": 30
+        },
+        {
+          "parameter": "PT INR",
+          "unit": "",
+          "conventionalUnit": "",
+          "referenceRange": "0.8 - 1.2",
+          "normalMin": 0.8,
+          "normalMax": 1.2,
+          "criticalMin": 0.5,
+          "criticalMax": 3.5
+        },
+        {
+          "parameter": "APTT",
+          "unit": "seconds",
+          "conventionalUnit": "sec",
+          "referenceRange": "25 - 35 seconds",
+          "normalMin": 25,
+          "normalMax": 35,
+          "criticalMin": 20,
+          "criticalMax": 100
+        },
+        {
+          "parameter": "Bleeding Time",
+          "unit": "minutes",
+          "conventionalUnit": "min",
+          "referenceRange": "2 - 7 minutes",
+          "normalMin": 2,
+          "normalMax": 7,
+          "criticalMin": 1,
+          "criticalMax": 15
+        },
+        {
+          "parameter": "Clotting Time",
+          "unit": "minutes",
+          "conventionalUnit": "min",
+          "referenceRange": "4 - 10 minutes",
+          "normalMin": 4,
+          "normalMax": 10,
+          "criticalMin": 3,
+          "criticalMax": 20
+        }
+      ]
+    },
+    {
+      "name": "Inflammatory Markers",
+      "category": "I",
+      "description": "Inflammation and Infection Markers",
+      "price": 2800,
+      "sampleType": "blood",
+      "fastingRequired": false,
+      "parameters": [
+        {
+          "parameter": "C-Reactive Protein (CRP)",
+          "unit": "mg/L",
+          "conventionalUnit": "mg/dL",
+          "referenceRange": "< 10 mg/L",
+          "normalMin": 0,
+          "normalMax": 10,
+          "criticalMin": 0,
+          "criticalMax": 100
+        },
+        {
+          "parameter": "ESR (Erythrocyte Sedimentation Rate)",
+          "unit": "mm/hr",
+          "conventionalUnit": "mm/hr",
+          "referenceRange": "Male: 0-15 mm/hr, Female: 0-20 mm/hr",
+          "normalMin": 0,
+          "normalMax": 20,
+          "criticalMin": 0,
+          "criticalMax": 100
+        },
+        {
+          "parameter": "Procalcitonin",
+          "unit": "ng/mL",
+          "conventionalUnit": "µg/L",
+          "referenceRange": "< 0.05 ng/mL",
+          "normalMin": 0,
+          "normalMax": 0.05,
+          "criticalMin": 0,
+          "criticalMax": 10
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "totalTests": 200,
+    "lastUpdated": "2024-01-15",
+    "version": "1.0",
+    "description": "Comprehensive laboratory test database with normal ranges and critical values"
+  }
+}

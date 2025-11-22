@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Setting_1 = __importDefault(require("../lab models/Setting"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Only authenticated lab technicians (or admin role) can view/update settings
 // import { verifyJWT, authorizeRoles } from "../middleware/auth";
@@ -28,6 +29,7 @@ router.get("/", async (_req, res) => {
 });
 // Update or create settings (upsert)
 router.put("/", async (req, res) => {
+    var _a;
     try {
         // Sanitize and map incoming body to new schema
         const body = req.body || {};
@@ -65,6 +67,13 @@ router.put("/", async (req, res) => {
             upsert: true,
             runValidators: true,
         });
+        try {
+            await (0, audit_1.logAudit)(req, "update_settings", "LabSettings", {
+                labName: (_a = updateDoc === null || updateDoc === void 0 ? void 0 : updateDoc.lab) === null || _a === void 0 ? void 0 : _a.labName,
+                hasPricing: !!(updateDoc === null || updateDoc === void 0 ? void 0 : updateDoc.pricing),
+            });
+        }
+        catch { }
         // Mirror field for backward compatibility in response
         const resp = (updated === null || updated === void 0 ? void 0 : updated.toObject) ? updated.toObject() : updated;
         if (resp === null || resp === void 0 ? void 0 : resp.pricing) {

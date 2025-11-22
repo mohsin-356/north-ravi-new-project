@@ -8,6 +8,7 @@ const express_validator_1 = require("express-validator");
 const localAuth_1 = require("./localAuth");
 const Staff_1 = __importDefault(require("../lab models/Staff"));
 const Attendance_1 = __importDefault(require("../lab models/Attendance"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Protect all routes; adjust role as needed (e.g., admin or labTech)
 router.use(localAuth_1.verifyJWT, (0, localAuth_1.authorizeRoles)(["labTech"]));
@@ -50,6 +51,11 @@ router.post("/", [(0, express_validator_1.body)("name").notEmpty(), (0, express_
     }
     try {
         const created = await Staff_1.default.create(req.body);
+        await (0, audit_1.logAudit)(req, "create_staff", "LabStaff", {
+            id: created._id,
+            name: created.name,
+            position: created.position,
+        });
         res.status(201).json(created);
         return;
     }
@@ -67,6 +73,11 @@ router.put("/:id", async (req, res) => {
             res.status(404).json({ message: "Staff not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "update_staff", "LabStaff", {
+            id: updated._id,
+            name: updated.name,
+            position: updated.position,
+        });
         res.json(updated);
         return;
     }
@@ -83,6 +94,11 @@ router.delete("/:id", async (req, res) => {
             res.status(404).json({ message: "Staff not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "delete_staff", "LabStaff", {
+            id: removed._id,
+            name: removed.name,
+            position: removed.position,
+        });
         res.json({});
         return;
     }

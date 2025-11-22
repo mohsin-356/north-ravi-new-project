@@ -24,6 +24,13 @@ interface IncomingParameter {
   unit?: string;
   conventionalUnit?: string;
   referenceRange?: string;
+  normalMin?: number | null;
+  normalMax?: number | null;
+  criticalMin?: number | null;
+  criticalMax?: number | null;
+  normalRangeMale?: string | null;
+  normalRangeFemale?: string | null;
+  normalRangePediatric?: string | null;
 }
 
 interface IncomingTestItem {
@@ -93,15 +100,32 @@ function mapParameter(p: IncomingParameter): any {
     name: p.parameter || '',
     unit: p.unit || '',
     conventionalUnit: p.conventionalUnit || undefined,
-    referenceRangeText: base.referenceRangeText ?? null,
+    referenceRangeText: base.referenceRangeText ?? (p.referenceRange ?? null),
   };
-  if (base.normalRange && (typeof base.normalRange.min === 'number' || typeof base.normalRange.max === 'number')) {
-    // Only attach keys that exist to keep document clean
+  // Prefer explicit numeric fields if provided
+  const hasNumericNormal = p.normalMin !== undefined || p.normalMax !== undefined;
+  if (hasNumericNormal) {
+    const nr: any = {};
+    if (typeof p.normalMin === 'number') nr.min = p.normalMin;
+    if (typeof p.normalMax === 'number') nr.max = p.normalMax;
+    if (Object.keys(nr).length) obj.normalRange = nr;
+  } else if (base.normalRange && (typeof base.normalRange.min === 'number' || typeof base.normalRange.max === 'number')) {
     const nr: any = {};
     if (typeof base.normalRange.min === 'number') nr.min = base.normalRange.min;
     if (typeof base.normalRange.max === 'number') nr.max = base.normalRange.max;
     if (Object.keys(nr).length) obj.normalRange = nr;
   }
+  const hasCrit = p.criticalMin !== undefined || p.criticalMax !== undefined;
+  if (hasCrit) {
+    const cr: any = {};
+    if (typeof p.criticalMin === 'number') cr.min = p.criticalMin;
+    if (typeof p.criticalMax === 'number') cr.max = p.criticalMax;
+    if (Object.keys(cr).length) obj.criticalRange = cr;
+  }
+  // Optional demographic text ranges (pass-through)
+  if (p.normalRangeMale) obj.normalRangeMale = p.normalRangeMale;
+  if (p.normalRangeFemale) obj.normalRangeFemale = p.normalRangeFemale;
+  if (p.normalRangePediatric) obj.normalRangePediatric = p.normalRangePediatric;
   return obj;
 }
 
@@ -132,8 +156,16 @@ async function run() {
   const raw = fs.readFileSync(dataPath, 'utf-8');
   let arr: IncomingTestItem[] = [];
   try {
-    arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) throw new Error('JSON root is not an array');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      arr = parsed as IncomingTestItem[];
+    } else if (parsed && Array.isArray(parsed.laboratoryTests)) {
+      arr = parsed.laboratoryTests as IncomingTestItem[];
+    } else if (parsed && Array.isArray(parsed.tests)) {
+      arr = parsed.tests as IncomingTestItem[];
+    } else {
+      throw new Error('Unrecognized JSON shape. Expected array or { laboratoryTests: [...] }');
+    }
   } catch (e: any) {
     console.error('[seed] Failed parsing JSON:', e?.message || e);
     process.exit(1);

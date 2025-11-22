@@ -30,6 +30,7 @@ const express_1 = require("express");
 // Auth disabled for lab endpoints (open access)
 const express_validator_1 = require("express-validator");
 const Test_1 = __importDefault(require("../lab models/Test"));
+const mongoose_1 = require("mongoose");
 const InventoryItem_1 = __importDefault(require("../lab models/InventoryItem"));
 const path = __importStar(require("path"));
 const XLSX = __importStar(require("xlsx"));
@@ -413,10 +414,26 @@ router.post("/appointments/:id/samples", allowAll, async (req, res) => {
         return;
     }
 });
-// Get single test with parameters
+// Get single test with parameters (accepts ObjectId OR name fallback)
 router.get("/tests/:id", allowAll, async (req, res) => {
     try {
-        const test = await Test_1.default.findById(req.params.id);
+        const raw = String(req.params.id || "").trim();
+        let test = null;
+        try {
+            if (raw && (0, mongoose_1.isValidObjectId)(raw)) {
+                test = await Test_1.default.findById(raw);
+            }
+        }
+        catch { }
+        if (!test && raw) {
+            // fallback by exact name, then case-insensitive match
+            test = await Test_1.default.findOne({ name: raw });
+            if (!test) {
+                const esc = raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                const rx = new RegExp(`^${esc}$`, 'i');
+                test = await Test_1.default.findOne({ name: rx });
+            }
+        }
         if (!test) {
             res.status(404).json({ message: "Test not found" });
             return;
@@ -588,7 +605,9 @@ router.get("/samples", allowAll, async (req, res) => {
             ];
         }
         if (!hasPaging) {
-            const list = await Sample_1.default.find(filter).sort({ createdAt: -1 }).populate('tests', 'name');
+            const list = await Sample_1.default.find(filter)
+                .sort({ createdAt: -1 })
+                .populate({ path: 'tests', select: 'name parameters' });
             res.json(list);
             return;
         }
@@ -598,7 +617,7 @@ router.get("/samples", allowAll, async (req, res) => {
         const [items, total] = await Promise.all([
             Sample_1.default.find(filter)
                 .sort({ createdAt: -1 })
-                .populate('tests', 'name')
+                .populate({ path: 'tests', select: 'name parameters' })
                 .skip(skip)
                 .limit(limit),
             Sample_1.default.countDocuments(filter),
@@ -615,7 +634,7 @@ router.get("/samples", allowAll, async (req, res) => {
 // Get single sample (for report generation)
 router.get("/samples/:id", allowAll, async (req, res) => {
     try {
-        const s = await Sample_1.default.findById(req.params.id);
+        const s = await Sample_1.default.findById(req.params.id).populate({ path: 'tests', select: 'name parameters' });
         if (!s)
             return res.status(404).json({ message: "Sample not found" });
         res.json(s);

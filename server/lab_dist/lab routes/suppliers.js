@@ -9,6 +9,7 @@ const express_validator_1 = require("express-validator");
 const Supplier_1 = __importDefault(require("../lab models/Supplier"));
 const InventoryItem_1 = __importDefault(require("../lab models/InventoryItem"));
 const Finance_1 = __importDefault(require("../lab models/Finance"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 router.use(localAuth_1.verifyJWT, (0, localAuth_1.authorizeRoles)(["labTech", "researcher"]));
 // List suppliers
@@ -73,6 +74,11 @@ router.post("/", [(0, express_validator_1.body)("name").notEmpty().withMessage("
     }
     try {
         const created = await Supplier_1.default.create(req.body);
+        await (0, audit_1.logAudit)(req, "create_supplier", "LabSupplier", {
+            id: created._id,
+            name: created.name,
+            company: created.company,
+        });
         res.status(201).json(created);
     }
     catch (err) {
@@ -96,6 +102,11 @@ router.put("/:id", async (req, res) => {
             res.status(404).json({ message: "Supplier not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "update_supplier", "LabSupplier", {
+            id: updated._id,
+            name: updated.name,
+            company: updated.company,
+        });
         res.json(updated);
     }
     catch (err) {
@@ -110,6 +121,11 @@ router.delete("/:id", async (req, res) => {
             res.status(404).json({ message: "Supplier not found" });
             return;
         }
+        await (0, audit_1.logAudit)(req, "delete_supplier", "LabSupplier", {
+            id: removed._id,
+            name: removed.name,
+            company: removed.company,
+        });
         res.json({});
     }
     catch (err) {

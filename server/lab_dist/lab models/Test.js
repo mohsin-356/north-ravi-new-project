@@ -13,6 +13,7 @@ const testSchema = new mongoose_1.Schema({
             id: String,
             name: String,
             unit: String,
+            conventionalUnit: { type: String, default: undefined },
             normalRangeMale: { type: String, default: null },
             normalRangeFemale: { type: String, default: null },
             normalRangePediatric: { type: String, default: null },
@@ -24,6 +25,7 @@ const testSchema = new mongoose_1.Schema({
                 min: Number,
                 max: Number,
             },
+            referenceRangeText: { type: String, default: null },
         },
     ],
 }, { timestamps: true });

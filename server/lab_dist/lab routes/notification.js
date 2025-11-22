@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Notification_1 = __importDefault(require("../lab models/Notification"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Auth disabled for notifications: open access
 // GET /notification - list notifications, latest first
@@ -55,6 +56,13 @@ router.patch("/:id/read", async (req, res) => {
         }
         notif.read = true;
         await notif.save();
+        try {
+            await (0, audit_1.logAudit)(req, "read_notification", "LabNotification", {
+                id: notif._id,
+                title: notif.title,
+            });
+        }
+        catch { }
         res.json(notif);
         return;
     }

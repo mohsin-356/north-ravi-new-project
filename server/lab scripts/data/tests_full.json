@@ -1,0 +1,392 @@
+[
+{
+"name": "A ACE (Angiotensin Converting Enzyme) Emergency",
+"category": "A",
+"description": "A ACE (Angiotensin Converting Enzyme) Emergency",
+"price": 2800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Angiotensin Converting Enzyme (ACE)",
+"unit": "U/L",
+"conventionalUnit": "U/L",
+"referenceRange": "8 - 53 U/L"
+}
+]
+},
+{
+"name": "A APTT",
+"category": "A",
+"description": "A APTT",
+"price": 4400,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Activated Partial Thromboplastin Time (APTT)",
+"unit": "seconds",
+"conventionalUnit": "sec",
+"referenceRange": "25 - 35 seconds"
+},
+{
+"parameter": "APTT Ratio",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "< 1.2"
+}
+]
+},
+{
+"name": "A Alpha Fetoprotein (AFP) FLUID",
+"category": "A",
+"description": "A Alpha Fetoprotein (AFP) FLUID",
+"price": 2000,
+"sampleType": "other",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Alpha Fetoprotein (AFP)",
+"unit": "ng/mL",
+"conventionalUnit": "ng/mL",
+"referenceRange": "< 8.5 ng/mL"
+}
+]
+},
+{
+"name": "A Aminophylline/Theophylline",
+"category": "A",
+"description": "A Aminophylline/Theophylline",
+"price": 1800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Theophylline Level",
+"unit": "mcg/mL",
+"conventionalUnit": "mcg/mL",
+"referenceRange": "10 - 20 mcg/mL"
+}
+]
+},
+{
+"name": "ABGs (Arterial Blood Gasses)",
+"category": "A",
+"description": "ABGs (Arterial Blood Gasses)",
+"price": 1800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "pH",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "7.35 - 7.45"
+},
+{
+"parameter": "pCO2",
+"unit": "mmHg",
+"conventionalUnit": "mmHg",
+"referenceRange": "35 - 45 mmHg"
+},
+{
+"parameter": "pO2",
+"unit": "mmHg",
+"conventionalUnit": "mmHg",
+"referenceRange": "75 - 100 mmHg"
+},
+{
+"parameter": "HCO3",
+"unit": "mEq/L",
+"conventionalUnit": "mmol/L",
+"referenceRange": "22 - 28 mEq/L"
+},
+{
+"parameter": "Base Excess",
+"unit": "mEq/L",
+"conventionalUnit": "mmol/L",
+"referenceRange": "-2 to +2 mEq/L"
+}
+]
+},
+{
+"name": "AC Albumin Emergency",
+"category": "A",
+"description": "AC Albumin Emergency",
+"price": 550,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Albumin",
+"unit": "g/dL",
+"conventionalUnit": "g/L",
+"referenceRange": "3.5 - 5.0 g/dL"
+}
+]
+},
+{
+"name": "ACE ANA BY ELISA Virtual Clinic",
+"category": "A",
+"description": "ACE ANA BY ELISA Virtual Clinic",
+"price": 2350,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Anti-Nuclear Antibody (ANA) by ELISA",
+"unit": "U/mL",
+"conventionalUnit": "U/mL",
+"referenceRange": "< 1.0 U/mL (Negative)"
+}
+]
+},
+{
+"name": "ACTH Virtual Clinic",
+"category": "A",
+"description": "ACTH Virtual Clinic",
+"price": 3000,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Adrenocorticotropic Hormone (ACTH)",
+"unit": "pg/mL",
+"conventionalUnit": "pg/mL",
+"referenceRange": "7.2 - 63.3 pg/mL"
+}
+]
+},
+{
+"name": "ADA Anti Transglutaminase IgM",
+"category": "A",
+"description": "ADA Anti Transglutaminase IgM",
+"price": 2600,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Anti-Tissue Transglutaminase IgM",
+"unit": "U/mL",
+"conventionalUnit": "U/mL",
+"referenceRange": "< 20 U/mL (Negative)"
+}
+]
+},
+{
+"name": "AFB C/S (Any Specimen)",
+"category": "A",
+"description": "AFB C/S (Any Specimen)",
+"price": 5500,
+"sampleType": "other",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Acid-Fast Bacilli Culture",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "Negative (No growth)"
+},
+{
+"parameter": "Sensitivity",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "Reported if positive"
+}
+]
+},
+{
+"name": "AFB Stain / ZN Stain(Any Specimen)",
+"category": "A",
+"description": "AFB Stain / ZN Stain(Any Specimen)",
+"price": 1300,
+"sampleType": "other",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "AFB Stain (ZN Stain)",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "Negative (No AFB seen)"
+}
+]
+},
+{
+"name": "AFB TB PCR",
+"category": "A",
+"description": "AFB TB PCR",
+"price": 4200,
+"sampleType": "other",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Mycobacterium tuberculosis PCR",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "Negative"
+}
+]
+},
+{
+"name": "AFCY Ascitic Fluid for Cytology",
+"category": "A",
+"description": "AFCY Ascitic Fluid for Cytology",
+"price": 1050,
+"sampleType": "other",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Cell Count",
+"unit": "cells/mm³",
+"conventionalUnit": "cells/µL",
+"referenceRange": "< 250 cells/mm³"
+},
+{
+"parameter": "Malignant Cells",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "Absent"
+}
+]
+},
+{
+"name": "AIR ALLERGENS",
+"category": "A",
+"description": "AIR ALLERGENS",
+"price": 6500,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Specific IgE to Air Allergens (Panel)",
+"unit": "kU/L",
+"conventionalUnit": "kU/L",
+"referenceRange": "Class 0 (<0.35 kU/L)"
+}
+]
+},
+{
+"name": "ALB Albumin/ Creatinine Ratio",
+"category": "A",
+"description": "ALB Albumin/ Creatinine Ratio",
+"price": 1200,
+"sampleType": "urine",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Albumin/Creatinine Ratio",
+"unit": "mg/g",
+"conventionalUnit": "mg/g",
+"referenceRange": "< 30 mg/g"
+}
+]
+},
+{
+"name": "ALD Aldosterone Level",
+"category": "A",
+"description": "ALD Aldosterone Level",
+"price": 3800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Aldosterone",
+"unit": "ng/dL",
+"conventionalUnit": "pg/mL",
+"referenceRange": "3 - 16 ng/dL (upright)"
+}
+]
+},
+{
+"name": "ALDOSTERONE / DIRECT RENIN RATIO",
+"category": "A",
+"description": "ALDOSTERONE / DIRECT RENIN RATIO",
+"price": 7800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Aldosterone",
+"unit": "ng/dL",
+"conventionalUnit": "pg/mL",
+"referenceRange": "3 - 16 ng/dL"
+},
+{
+"parameter": "Direct Renin",
+"unit": "pg/mL",
+"conventionalUnit": "pg/mL",
+"referenceRange": "5 - 45 pg/mL"
+},
+{
+"parameter": "Aldosterone/Renin Ratio",
+"unit": "",
+"conventionalUnit": "",
+"referenceRange": "< 20"
+}
+]
+},
+{
+"name": "ALP Alpha – 1 Anti Trypsin Level",
+"category": "A",
+"description": "ALP Alpha – 1 Anti Trypsin Level",
+"price": 2250,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Alpha-1 Antitrypsin",
+"unit": "mg/dL",
+"conventionalUnit": "g/L",
+"referenceRange": "100 - 220 mg/dL"
+}
+]
+},
+{
+"name": "ALT SHBG Emergency",
+"category": "A",
+"description": "ALT SHBG Emergency",
+"price": 2400,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Sex Hormone Binding Globulin (SHBG)",
+"unit": "nmol/L",
+"conventionalUnit": "nmol/L",
+"referenceRange": "Male: 10 - 57 nmol/L, Female: 18 - 144 nmol/L"
+}
+]
+},
+{
+"name": "AMA Anti Phospholipids Abs IgM Emergency",
+"category": "A",
+"description": "AMA Anti Phospholipids Abs IgM Emergency",
+"price": 3200,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Anti-Phospholipid IgM",
+"unit": "MPL U/mL",
+"conventionalUnit": "MPL U/mL",
+"referenceRange": "< 12 MPL U/mL (Negative)"
+}
+]
+},
+{
+"name": "AMH Anti Mullerian Hormone (AMH)",
+"category": "A",
+"description": "AMH Anti Mullerian Hormone (AMH)",
+"price": 2800,
+"sampleType": "blood",
+"fastingRequired": false,
+"parameters": [
+{
+"parameter": "Anti-Mullerian Hormone (AMH)",
+"unit": "ng/mL",
+"conventionalUnit": "pmol/L",
+"referenceRange": "Female: 1.0 - 4.0 ng/mL"
+}
+]
+}
+]

@@ -9,6 +9,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const localAuth_1 = require("./localAuth");
 const Staff_1 = __importDefault(require("../lab models/Staff"));
 const Attendance_1 = __importDefault(require("../lab models/Attendance"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 router.use(localAuth_1.verifyJWT, (0, localAuth_1.authorizeRoles)(["labTech", "researcher"]));
 // Get daily attendance ?date=YYYY-MM-DD
@@ -47,6 +48,12 @@ router.post("/", [
     }
     try {
         const created = await Attendance_1.default.create({ ...req.body, staffName: staff.name });
+        await (0, audit_1.logAudit)(req, "create_attendance", "LabAttendance", {
+            id: created._id,
+            staffId: String(req.body.staffId),
+            date: req.body.date,
+            status: req.body.status,
+        });
         res.status(201).json(created);
         return;
     }
@@ -87,6 +94,12 @@ router.post("/clock-in", [(0, express_validator_1.body)("staffId").notEmpty()], 
     const rec = await Attendance_1.default.findOneAndUpdate({ staffId, date: today }, {
         $set: { status: "present", checkInTime: new Date().toISOString(), staffName: staff.name },
     }, { upsert: true, new: true }).lean();
+    await (0, audit_1.logAudit)(req, "clock_in", "LabAttendance", {
+        staffId,
+        date: today,
+        recordId: rec === null || rec === void 0 ? void 0 : rec._id,
+        checkIn: rec === null || rec === void 0 ? void 0 : rec.checkInTime,
+    });
     res.status(201).json({ ...rec, checkIn: rec === null || rec === void 0 ? void 0 : rec.checkInTime });
     return;
 });
@@ -135,6 +148,12 @@ router.post("/clock-out", [(0, express_validator_1.body)("staffId").notEmpty()],
         $set: { checkOutTime: new Date().toISOString(), staffName: staff.name },
         $setOnInsert: { status: "present" },
     }, { upsert: true, new: true }).lean();
+    await (0, audit_1.logAudit)(req, "clock_out", "LabAttendance", {
+        staffId,
+        date: today,
+        recordId: rec === null || rec === void 0 ? void 0 : rec._id,
+        checkOut: rec === null || rec === void 0 ? void 0 : rec.checkOutTime,
+    });
     res.status(201).json({ ...rec, checkOut: rec === null || rec === void 0 ? void 0 : rec.checkOutTime });
     return;
 });

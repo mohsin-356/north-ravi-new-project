@@ -7,6 +7,7 @@ const express_1 = require("express");
 const auth_1 = require("../middleware/auth");
 const Appointment_1 = __importDefault(require("../lab models/Appointment"));
 const Sample_1 = __importDefault(require("../lab models/Sample"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Note: Doctor model/routes were removed as per project scope.
 // Book an appointment (patient authenticated)
@@ -15,6 +16,15 @@ router.post("/appointments", auth_1.verifyJWT, (0, auth_1.authorizeRoles)(["pati
         const user = req.user;
         const payload = { ...req.body, patientId: user.uid };
         const appointment = await Appointment_1.default.create(payload);
+        try {
+            await (0, audit_1.logAudit)(req, "patient_book_appointment", "LabPatient", {
+                appointmentId: appointment._id,
+                patientId: user.uid,
+                date: appointment.date,
+                time: appointment.time,
+            });
+        }
+        catch { }
         res.status(201).json(appointment);
         return;
     }
@@ -56,6 +66,14 @@ router.put("/appointments/:id/cancel", async (req, res) => {
         }
         appt.status = "Cancelled";
         await appt.save();
+        try {
+            await (0, audit_1.logAudit)(req, "patient_cancel_appointment", "LabPatient", {
+                appointmentId: id,
+                patientId: user.uid,
+                status: appt.status,
+            });
+        }
+        catch { }
         res.json(appt);
         return;
     }

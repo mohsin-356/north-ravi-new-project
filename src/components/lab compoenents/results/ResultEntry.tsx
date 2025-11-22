@@ -83,7 +83,7 @@ const ResultEntryClean = ({ onNavigateBack }: ResultEntryProps) => {
       const { data } = await api.get(`/labtech/tests/${testId}`);
       // Normalize parameters to include optional gender/age specific ranges if present
       const params = (data.parameters || []).map((p: any) => ({
-        id: p.id,
+        id: p.id || p._id || `${p.name}|${p.unit || ''}`,
         name: p.name,
         unit: p.unit,
         normalRange: p.normalRange || { min: undefined, max: undefined },
@@ -121,15 +121,54 @@ const ResultEntryClean = ({ onNavigateBack }: ResultEntryProps) => {
     // Load parameter definitions for all tests in this sample so units and normal ranges auto-fill
     const loadParamsForSample = async () => {
       try {
-        const testIds = (selectedSample.tests || [])
-          .map((t: any) => (typeof t === 'string' ? t : (t?._id || t?.id)))
+        // Try to refetch the selected sample populated from backend to ensure tests include parameters
+        let tests = (selectedSample.tests || []) as any[];
+        try {
+          const { data: enriched } = await api.get(`/labtech/samples/${selectedSample._id}`);
+          if (enriched && Array.isArray(enriched.tests)) {
+            // Prefer enriched tests if they contain parameters
+            const hasParams = enriched.tests.some((t: any) => Array.isArray(t?.parameters) && t.parameters.length > 0);
+            if (hasParams) tests = enriched.tests as any[];
+          }
+        } catch {}
+        // 1) Prefer parameters embedded via populate if present
+        const embeddedParams: any[] = [];
+        tests.forEach((t: any) => {
+          const params = (t && t.parameters) ? t.parameters : [];
+          params.forEach((p: any) => embeddedParams.push({
+            id: p.id || p._id || `${p.name}|${p.unit || ''}`,
+            name: p.name,
+            unit: p.unit,
+            normalRange: p.normalRange || { min: undefined, max: undefined },
+            normalRangeMale: p.normalRangeMale || p.normalRange_male || null,
+            normalRangeFemale: p.normalRangeFemale || p.normalRange_female || null,
+            normalRangePediatric: p.normalRangePediatric || p.normalRange_pediatric || null,
+            criticalRange: p.criticalRange || undefined,
+          }));
+        });
+        const dedupe = (arr: any[]) => {
+          const out: any[] = [];
+          const seen = new Set<string>();
+          arr.forEach((p: any) => {
+            const key = p.id || `${p.name}|${p.unit || ''}`;
+            if (key && !seen.has(key)) { seen.add(key); out.push(p); }
+          });
+          return out;
+        };
+        if (embeddedParams.length) {
+          setTestParameters(dedupe(embeddedParams));
+          return;
+        }
+        // 2) Fallback: fetch each test to get parameters
+        const testIds = tests
+          .map((t: any) => (typeof t === 'string' ? t : (t?._id || t?.id || t?.name)))
           .filter(Boolean);
         if (testIds.length === 0) { setTestParameters([]); return; }
-        const results = await Promise.all(
+        const fetched = await Promise.all(
           testIds.map(async (tid: string) => {
             const { data } = await api.get(`/labtech/tests/${tid}`);
             const params = (data.parameters || []).map((p: any) => ({
-              id: p.id,
+              id: p.id || p._id || `${p.name}|${p.unit || ''}`,
               name: p.name,
               unit: p.unit,
               normalRange: p.normalRange || { min: undefined, max: undefined },
@@ -141,14 +180,97 @@ const ResultEntryClean = ({ onNavigateBack }: ResultEntryProps) => {
             return params as any[];
           })
         );
-        // Merge and de-duplicate by parameter id and name
-        const merged: any[] = [];
-        const seen = new Set<string>();
-        results.flat().forEach((p: any) => {
-          const key = p.id || `${p.name}|${p.unit}`;
-          if (key && !seen.has(key)) { seen.add(key); merged.push(p); }
-        });
-        setTestParameters(merged as any);
+        const byDb = dedupe(fetched.flat());
+        if (byDb.length) { setTestParameters(byDb); return; }
+
+        // 3) Final fallback: use master tests CSV served by backend to derive parameters by test name
+        try {
+          const { data: master } = await api.get('/labtech/master-tests-public');
+          if (Array.isArray(master) && master.length && tests.length) {
+            // helper: fuzzy match a master Test_Name to the given test name
+            const norm = (s: string) => {
+              const x = (s || '').toString().toLowerCase()
+                .replace(/\bhrs?\b/g, 'hour')
+                .replace(/\b24\s*hours?\b/g, '24hour')
+                .replace(/\s+/g, ' ')
+                .trim();
+              return x.replace(/[^a-z0-9]+/g, '');
+            };
+            const score = (a: string, b: string) => {
+              if (!a || !b) return 0;
+              const na = norm(a), nb = norm(b);
+              if (!na || !nb) return 0;
+              if (na === nb) return 1.0;
+              if (na.includes(nb) || nb.includes(na)) return 0.92;
+              const ta = new Set(na.split(/\d+|[^a-z]+/).filter(Boolean));
+              const tb = new Set(nb.split(/\d+|[^a-z]+/).filter(Boolean));
+              if (!ta.size || !tb.size) return 0;
+              let inter = 0; ta.forEach(t => { if (tb.has(t)) inter++; });
+              const union = ta.size + tb.size - inter;
+              return inter / union;
+            };
+            const findBestRows = (testName: string) => {
+              const name = (testName || '').toString();
+              // group rows by their Test_Name
+              const byName = new Map<string, any[]>();
+              (master as any[]).forEach((r: any) => {
+                const tn = (r.Test_Name ?? '').toString();
+                if (!byName.has(tn)) byName.set(tn, []);
+                byName.get(tn)!.push(r);
+              });
+              let bestName = '';
+              let bestScore = 0;
+              byName.forEach((_rows, tn) => {
+                const sc = score(name, tn);
+                if (sc > bestScore) { bestScore = sc; bestName = tn; }
+              });
+              if (bestScore < 0.55) return [] as any[]; // too weak
+              return byName.get(bestName) || [];
+            };
+
+            const rowsToParams = (testName: string) => {
+              const matched = findBestRows(testName);
+              const out: any[] = [];
+              matched.forEach((r: any) => {
+                const pname = String(r.Parameter || '').trim();
+                const unit = String(r.Unit || '').trim();
+                const male = r.Normal_Range_Male || null;
+                const female = r.Normal_Range_Female || null;
+                const ped = r.Normal_Range_Pediatric || null;
+                const ref = r.Reference_Range || r.Reference || null;
+                // prefer group-specific strings; else use single reference text if present
+                const nr: any = {};
+                // Try to parse "A - B" style when Reference_Range given
+                const parseStrRange = (s: any) => {
+                  if (!s || typeof s !== 'string') return null;
+                  const m = s.match(/(-?\d+(?:\.\d+)?)\s*[-–]\s*(-?\d+(?:\.\d+)?)/);
+                  if (m) return { min: parseFloat(m[1]), max: parseFloat(m[2]) };
+                  return null;
+                };
+                const parsed = parseStrRange(ref);
+                if (parsed) nr.min = parsed.min, nr.max = parsed.max;
+                const param = {
+                  id: `${pname}|${unit}`,
+                  name: pname || testName,
+                  unit,
+                  normalRange: Object.keys(nr).length ? nr : { min: undefined, max: undefined },
+                  normalRangeMale: male || null,
+                  normalRangeFemale: female || null,
+                  normalRangePediatric: ped || null,
+                };
+                if (pname || unit) out.push(param);
+              });
+              return out;
+            };
+            const fromMaster = dedupe(
+              tests.flatMap((t: any) => rowsToParams(typeof t === 'string' ? t : (t?.name || '')))
+            );
+            if (fromMaster.length) { setTestParameters(fromMaster); return; }
+          }
+        } catch {}
+
+        // If all fallbacks fail, leave empty array (user can add manual rows)
+        setTestParameters([]);
       } catch {
         toast({ title: 'Error', description: 'Failed to load parameters for sample tests', variant: 'destructive' });
       }

@@ -31,6 +31,7 @@ const express_validator_1 = require("express-validator");
 const bcrypt = __importStar(require("bcryptjs"));
 const jwt = __importStar(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../lab models/User"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // Normalize role to backend canonical form
 const normalizeRole = (role) => {
@@ -55,6 +56,13 @@ const registerHandler = async (req, res) => {
         }
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await User_1.default.create({ username, passwordHash, role });
+        await (0, audit_1.logAudit)(req, "register", "LabAuth", {
+            id: user._id,
+            username: user.username,
+            role: user.role,
+            method: req.method,
+            path: req.originalUrl,
+        });
         res.status(201).json({ id: user._id });
         return;
     }
@@ -93,6 +101,13 @@ const loginHandler = async (req, res) => {
             return;
         }
         const token = jwt.sign({ uid: user._id, role: user.role, username: user.username }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
+        await (0, audit_1.logAudit)(req, "login", "LabAuth", {
+            id: user._id,
+            username: user.username,
+            role: user.role,
+            method: req.method,
+            path: req.originalUrl,
+        });
         res.json({ token, role: user.role });
         return;
     }

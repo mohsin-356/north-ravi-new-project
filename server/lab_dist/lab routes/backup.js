@@ -7,12 +7,17 @@ const express_1 = require("express");
 const backup_1 = require("../lab utils/backup");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const audit_1 = require("../lab utils/audit");
 const router = (0, express_1.Router)();
 // POST /backup/manual – trigger a manual backup and return file information
 router.post("/manual", async (_req, res) => {
     try {
         const filePath = await (0, backup_1.performBackup)();
         const fileName = path_1.default.basename(filePath);
+        try {
+            await (0, audit_1.logAudit)(_req, "backup_manual", "LabBackup", { fileName });
+        }
+        catch { }
         res.json({ fileName });
     }
     catch (err) {
@@ -34,6 +39,10 @@ router.get("/download/:fileName", (req, res) => {
 router.post("/purge", async (_req, res) => {
     try {
         await (0, backup_1.purgeData)();
+        try {
+            await (0, audit_1.logAudit)(_req, "backup_purge", "LabBackup", {});
+        }
+        catch { }
         res.json({ message: "All data deleted" });
     }
     catch (err) {
@@ -49,6 +58,10 @@ router.post("/restore", async (req, res) => {
             return;
         }
         await (0, backup_1.restoreBackup)(data);
+        try {
+            await (0, audit_1.logAudit)(req, "backup_restore", "LabBackup", { size: JSON.stringify(data).length });
+        }
+        catch { }
         res.json({ message: "Data restored" });
     }
     catch (err) {

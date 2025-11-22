@@ -75,10 +75,16 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
   // helper functions for parameter list
   const addParam = () => {
     if (editingTest) {
-      (editingTest as any).parameters = [...((editingTest as any).parameters||[]), { id:'',name:'',unit:'',normalMin:0,normalMax:0 }];
+      (editingTest as any).parameters = [
+        ...(((editingTest as any).parameters)||[]),
+        { id:'', name:'', unit:'', normalMin:0, normalMax:0, criticalMin: undefined, criticalMax: undefined, normalRangeMale:'', normalRangeFemale:'', normalRangePediatric:'' }
+      ];
       setEditingTest({ ...editingTest });
     } else {
-      setNewTest(prev=>({...prev, parameters:[...prev.parameters, { id:'',name:'',unit:'',normalMin:0,normalMax:0 }]}));
+      setNewTest(prev=>({
+        ...prev,
+        parameters:[...prev.parameters, { id:'', name:'', unit:'', normalMin:0, normalMax:0, criticalMin: undefined, criticalMax: undefined, normalRangeMale:'', normalRangeFemale:'', normalRangePediatric:'' }]
+      }));
     }
   };
   const updateParam = (idx:number,key:string,value:any)=>{
@@ -99,6 +105,34 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
       setEditingTest({ ...editingTest });
     } else {
       setNewTest({...newTest, parameters: newTest.parameters.filter((_,i)=>i!==idx)});
+    }
+  };
+
+  const saveParamRow = async (idx:number) => {
+    if (!editingTest) return;
+    try {
+      const et: any = editingTest as any;
+      const hasList = Array.isArray(et.parameters) && et.parameters.length > 0;
+      const mapped = hasList ? et.parameters.map(mapParam) : [];
+      const payload = { ...editingTest, parameters: mapped } as any;
+      const res = await fetch(`/api/labtech/tests/${(editingTest as any)._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        toast({ title: 'Error', description: 'Failed to update parameter', variant: 'destructive' });
+        return;
+      }
+      const updated = await res.json();
+      setTests((prev)=> prev.map(t=> (t._id === updated._id ? updated : t)));
+      setEditingTest(updated);
+      toast({ title: 'Updated', description: `Parameter ${idx+1} saved.` });
+    } catch {
+      toast({ title: 'Error', description: 'Update failed', variant: 'destructive' });
     }
   };
 
@@ -125,6 +159,9 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
     normalMax: number;
     criticalMin?: number;
     criticalMax?: number;
+    normalRangeMale?: string;
+    normalRangeFemale?: string;
+    normalRangePediatric?: string;
   }
 
   const [newTest, setNewTest] = useState({
@@ -268,6 +305,9 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
       max: (p as any).normalMax ?? (p as any).normalRange?.max,
     },
     criticalRange: p.criticalMin !== undefined && p.criticalMax !== undefined ? { min: p.criticalMin, max: p.criticalMax } : undefined,
+    normalRangeMale: p.normalRangeMale || undefined,
+    normalRangeFemale: p.normalRangeFemale || undefined,
+    normalRangePediatric: p.normalRangePediatric || undefined,
   });
 
   const handleAddTest = async () => {
@@ -707,6 +747,38 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
               </div>
             </div>
 
+            {/* Parameters editor inside the form */}
+            <div className="flex items-center justify-between mt-4">
+              <h3 className="text-base font-semibold">Parameters</h3>
+              <Button variant="outline" size="sm" onClick={addParam}>+ Add Parameter</Button>
+            </div>
+            <div className="space-y-4">
+              {(editingTest ? (editingTest as any).parameters : newTest.parameters).map((p, idx) => (
+                <div key={idx} className="border rounded-md p-3 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input placeholder="Parameter" value={p.name} onChange={e=>updateParam(idx,'name',e.target.value)} />
+                    <Input placeholder="Unit (optional)" value={p.unit} onChange={e=>updateParam(idx,'unit',e.target.value)} />
+                    <Input placeholder="Custom ID (optional)" value={p.id} onChange={e=>updateParam(idx,'id',e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input placeholder="Normal Range (Male)" value={p.normalRangeMale||''} onChange={e=>updateParam(idx,'normalRangeMale',e.target.value)} />
+                    <Input placeholder="Normal Range (Female)" value={p.normalRangeFemale||''} onChange={e=>updateParam(idx,'normalRangeFemale',e.target.value)} />
+                    <Input placeholder="Normal Range (Pediatric)" value={p.normalRangePediatric||''} onChange={e=>updateParam(idx,'normalRangePediatric',e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
+                    <Input type="number" placeholder="Norm Min" value={p.normalMin} onChange={e=>updateParam(idx,'normalMin',e.target.valueAsNumber)} />
+                    <Input type="number" placeholder="Norm Max" value={p.normalMax} onChange={e=>updateParam(idx,'normalMax',e.target.valueAsNumber)} />
+                    <Input type="number" placeholder="Crit Min" value={p.criticalMin ?? ''} onChange={e=>updateParam(idx,'criticalMin',e.target.valueAsNumber)} />
+                    <Input type="number" placeholder="Crit Max" value={p.criticalMax ?? ''} onChange={e=>updateParam(idx,'criticalMax',e.target.valueAsNumber)} />
+                    <div className="col-span-2 flex gap-2 justify-end">
+                      {editingTest && <Button variant="outline" size="sm" onClick={()=>saveParamRow(idx)}>Update</Button>}
+                      <Button variant="outline" size="sm" onClick={()=>removeParam(idx)}>Remove</Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex justify-end space-x-2">
               <Button 
                 variant="outline" 
@@ -731,21 +803,7 @@ const TestCatalog = ({ onNavigateBack }: TestCatalogProps) => {
         </Card>
       )}
 
-      {/* Parameter inputs */}
-          <div className="space-y-4">
-            {(editingTest ? (editingTest as any).parameters : newTest.parameters).map((p, idx) => (
-              <div key={idx} className="grid grid-cols-6 gap-2 items-end">
-                <Input placeholder="ID" value={p.id} onChange={e=>updateParam(idx,'id',e.target.value)} />
-                <Input placeholder="Name" value={p.name} onChange={e=>updateParam(idx,'name',e.target.value)} />
-                <Input placeholder="Unit" value={p.unit} onChange={e=>updateParam(idx,'unit',e.target.value)} />
-                <Input type="number" placeholder="Norm Min" value={p.normalMin} onChange={e=>updateParam(idx,'normalMin',e.target.valueAsNumber)} />
-                <Input type="number" placeholder="Norm Max" value={p.normalMax} onChange={e=>updateParam(idx,'normalMax',e.target.valueAsNumber)} />
-                <Button variant="outline" size="sm" onClick={()=>removeParam(idx)}>Del</Button>
-                <Input type="number" placeholder="Crit Min" value={p.criticalMin??''} onChange={e=>updateParam(idx,'criticalMin',e.target.valueAsNumber)} />
-                <Input type="number" placeholder="Crit Max" value={p.criticalMax??''} onChange={e=>updateParam(idx,'criticalMax',e.target.valueAsNumber)} />
-              </div>
-            ))}
-          </div>
+      
 
       <datalist id="test-name-options">
         {masterNameOptions.map((name, i) => (

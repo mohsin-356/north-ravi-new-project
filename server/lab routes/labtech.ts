@@ -2,6 +2,7 @@ import { Router } from "express";
 // Auth disabled for lab endpoints (open access)
 import { body, validationResult } from "express-validator";
 import Test from "../lab models/Test";
+import { isValidObjectId } from "mongoose";
 import InventoryItem from "../lab models/InventoryItem";
 import * as path from "path";
 import * as XLSX from "xlsx";
@@ -415,10 +416,25 @@ router.post("/appointments/:id/samples", allowAll, async (req, res) => {
   }
 });
 
-// Get single test with parameters
+// Get single test with parameters (accepts ObjectId OR name fallback)
 router.get("/tests/:id", allowAll, async (req, res) => {
   try {
-    const test = await Test.findById(req.params.id);
+    const raw = String(req.params.id || "").trim();
+    let test = null as any;
+    try {
+      if (raw && isValidObjectId(raw)) {
+        test = await Test.findById(raw);
+      }
+    } catch {}
+    if (!test && raw) {
+      // fallback by exact name, then case-insensitive match
+      test = await Test.findOne({ name: raw });
+      if (!test) {
+        const esc = raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const rx = new RegExp(`^${esc}$`, 'i');
+        test = await Test.findOne({ name: rx });
+      }
+    }
     if (!test) {
       res.status(404).json({ message: "Test not found" });
       return;
@@ -601,9 +617,77 @@ router.get("/samples", allowAll, async (req, res) => {
       ];
     }
 
+    const enrich = (tests: any[]) => {
+      const parseRange = (s?: string) => {
+        if (!s || typeof s !== 'string') return undefined;
+        const m = s.match(/(-?\d+(?:\.\d+)?)\s*[-–]\s*(-?\d+(?:\.\d+)?)/);
+        if (m) return { min: Number(m[1]), max: Number(m[2]) } as any;
+        return undefined;
+      };
+      const norm = (s: string) => (s || '').toString().toLowerCase().replace(/\bhrs?\b/g,'hour').replace(/\b24\s*hours?\b/g,'24hour').replace(/\s+/g,' ').trim().replace(/[^a-z0-9]+/g,'');
+      const score = (a: string, b: string) => {
+        const na = norm(a), nb = norm(b);
+        if (!na || !nb) return 0;
+        if (na === nb) return 1.0;
+        if (na.includes(nb) || nb.includes(na)) return 0.92;
+        const ta = new Set(na.split(/\d+|[^a-z]+/).filter(Boolean));
+        const tb = new Set(nb.split(/\d+|[^a-z]+/).filter(Boolean));
+        if (!ta.size || !tb.size) return 0;
+        let inter = 0; ta.forEach(t => { if (tb.has(t)) inter++; });
+        const union = ta.size + tb.size - inter;
+        return inter/union;
+      };
+      const byName = new Map<string, any[]>();
+      (masterTestsCache || []).forEach((r: any) => {
+        const tn = String(r.Test_Name || '').trim();
+        if (!tn) return;
+        const arr = byName.get(tn) || [];
+        arr.push(r);
+        byName.set(tn, arr);
+      });
+      return (Array.isArray(tests) ? tests : []).map((t: any) => {
+        if (t && (!t.parameters || !t.parameters.length) && t.name) {
+          let rows = byName.get(String(t.name)) || [];
+          if (!rows.length) {
+            // fuzzy: pick best group
+            let bestName = '';
+            let bestScore = 0;
+            byName.forEach((_rows, tn) => {
+              const sc = score(String(t.name), tn);
+              if (sc > bestScore) { bestScore = sc; bestName = tn; }
+            });
+            if (bestScore >= 0.55) rows = byName.get(bestName) || [];
+          }
+          if (rows.length) {
+            const params = rows.map((r: any) => {
+              const pname = String(r.Parameter || '').trim();
+              const unit = String(r.Unit || '').trim();
+              const ref = (r.Reference_Range || r.Reference || '') as string;
+              const nr = parseRange(ref);
+              const o: any = { name: pname || t.name, unit };
+              if (nr) o.normalRange = nr;
+              if (r.Normal_Range_Male) o.normalRangeMale = r.Normal_Range_Male;
+              if (r.Normal_Range_Female) o.normalRangeFemale = r.Normal_Range_Female;
+              if (r.Normal_Range_Pediatric) o.normalRangePediatric = r.Normal_Range_Pediatric;
+              return o;
+            });
+            return { ...t, parameters: params };
+          }
+        }
+        return t;
+      });
+    };
+
     if (!hasPaging) {
-      const list = await Sample.find(filter).sort({ createdAt: -1 }).populate('tests', 'name');
-      res.json(list);
+      const list = await Sample.find(filter)
+        .sort({ createdAt: -1 })
+        .populate({ path: 'tests', select: 'name parameters' });
+      const enriched = list.map((s: any) => {
+        const obj = s.toObject ? s.toObject() : s;
+        obj.tests = enrich(obj.tests || []);
+        return obj;
+      });
+      res.json(enriched);
       return;
     }
 
@@ -614,13 +698,18 @@ router.get("/samples", allowAll, async (req, res) => {
     const [items, total] = await Promise.all([
       Sample.find(filter)
         .sort({ createdAt: -1 })
-        .populate('tests', 'name')
+        .populate({ path: 'tests', select: 'name parameters' })
         .skip(skip)
         .limit(limit),
       Sample.countDocuments(filter),
     ]);
 
-    res.json({ data: items, page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
+    const enrichedItems = items.map((s: any) => {
+      const obj = s.toObject ? s.toObject() : s;
+      obj.tests = enrich(obj.tests || []);
+      return obj;
+    });
+    res.json({ data: enrichedItems, page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
     return;
   } catch (err) {
     console.error('[GET /api/labtech/samples] error', err);
@@ -632,9 +721,71 @@ router.get("/samples", allowAll, async (req, res) => {
 // Get single sample (for report generation)
 router.get("/samples/:id", allowAll, async (req, res) => {
   try {
-    const s = await Sample.findById(req.params.id);
+    const s = await Sample.findById(req.params.id).populate({ path: 'tests', select: 'name parameters' });
     if (!s) return res.status(404).json({ message: "Sample not found" });
-    res.json(s);
+
+    const parseRange = (str?: string) => {
+      if (!str || typeof str !== 'string') return undefined;
+      const m = str.match(/(-?\d+(?:\.\d+)?)\s*[-–]\s*(-?\d+(?:\.\d+)?)/);
+      if (m) return { min: Number(m[1]), max: Number(m[2]) } as any;
+      return undefined;
+    };
+    const byName = new Map<string, any[]>();
+    (masterTestsCache || []).forEach((r: any) => {
+      const tn = String(r.Test_Name || '').trim();
+      if (!tn) return;
+      const arr = byName.get(tn) || [];
+      arr.push(r);
+      byName.set(tn, arr);
+    });
+
+    const obj = (s as any).toObject ? (s as any).toObject() : (s as any);
+    const tests = Array.isArray(obj.tests) ? obj.tests : [];
+    const norm = (s: string) => (s || '').toString().toLowerCase().replace(/\bhrs?\b/g,'hour').replace(/\b24\s*hours?\b/g,'24hour').replace(/\s+/g,' ').trim().replace(/[^a-z0-9]+/g,'');
+    const score = (a: string, b: string) => {
+      const na = norm(a), nb = norm(b);
+      if (!na || !nb) return 0;
+      if (na === nb) return 1.0;
+      if (na.includes(nb) || nb.includes(na)) return 0.92;
+      const ta = new Set(na.split(/\d+|[^a-z]+/).filter(Boolean));
+      const tb = new Set(nb.split(/\d+|[^a-z]+/).filter(Boolean));
+      if (!ta.size || !tb.size) return 0;
+      let inter = 0; ta.forEach(t => { if (tb.has(t)) inter++; });
+      const union = ta.size + tb.size - inter;
+      return inter/union;
+    };
+    obj.tests = tests.map((t: any) => {
+      if (t && (!t.parameters || !t.parameters.length) && t.name) {
+        let rows = byName.get(String(t.name)) || [];
+        if (!rows.length) {
+          let bestName = '';
+          let bestScore = 0;
+          byName.forEach((_rows, tn) => {
+            const sc = score(String(t.name), tn);
+            if (sc > bestScore) { bestScore = sc; bestName = tn; }
+          });
+          if (bestScore >= 0.55) rows = byName.get(bestName) || [];
+        }
+        if (rows.length) {
+          const params = rows.map((r: any) => {
+            const pname = String(r.Parameter || '').trim();
+            const unit = String(r.Unit || '').trim();
+            const ref = (r.Reference_Range || r.Reference || '') as string;
+            const nr = parseRange(ref);
+            const o: any = { name: pname || t.name, unit };
+            if (nr) o.normalRange = nr;
+            if (r.Normal_Range_Male) o.normalRangeMale = r.Normal_Range_Male;
+            if (r.Normal_Range_Female) o.normalRangeFemale = r.Normal_Range_Female;
+            if (r.Normal_Range_Pediatric) o.normalRangePediatric = r.Normal_Range_Pediatric;
+            return o;
+          });
+          return { ...t, parameters: params };
+        }
+      }
+      return t;
+    });
+
+    res.json(obj);
     return;
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch sample" });
